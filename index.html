@@ -802,7 +802,7 @@ const SERIES_COLOR_POOL = ["#8fa4cc","#6fa3e0","#d03a3a","#d9b45b","#c98ae0","#e
       https://имя-проекта-default-rtdb.europe-west1.firebasedatabase.app
       и вставить в кавычки строкой ниже:
    ============================================================ */
-const DB_URL = "https://fate-base-friends-default-rtdb.europe-west1.firebasedatabase.app";
+const DB_URL = "";
 
 const DB_PATH = "/fate-grail.json";
 const LS_KEY = "fate_grail_local_v1";
@@ -883,10 +883,26 @@ function mergeStates(remote, local, base){
   return {masters, titles};
 }
 
+/* Firebase выбрасывает пустые объекты и может превращать массивы
+   в объекты с числовыми ключами — приводим данные в порядок
+   после каждого чтения */
+function normalizeState(st){
+  if(!st) return st;
+  if(st.titles && !Array.isArray(st.titles)) st.titles = Object.values(st.titles);
+  if(st.masters && !Array.isArray(st.masters)) st.masters = Object.values(st.masters);
+  st.titles = (st.titles||[]).filter(Boolean).map(t=>{
+    t.ratings = t.ratings || {};
+    t.reviews = t.reviews || {};
+    return t;
+  });
+  st.masters = (st.masters||[]).filter(Boolean);
+  return st;
+}
+
 async function remoteGet(){
   const r = await fetch(DB_URL + DB_PATH, {cache:"no-store"});
   if(!r.ok) throw new Error("http "+r.status);
-  return await r.json(); /* null, если данных ещё нет */
+  return normalizeState(await r.json()); /* null, если данных ещё нет */
 }
 async function remotePut(payload){
   const r = await fetch(DB_URL + DB_PATH, {method:"PUT", headers:{"Content-Type":"application/json"}, body: payload});
@@ -900,7 +916,7 @@ async function loadState(){
   /* мгновенная отрисовка из локального кэша устройства */
   try{
     const cached = localStorage.getItem(LS_KEY);
-    if(cached) state = JSON.parse(cached);
+    if(cached) state = normalizeState(JSON.parse(cached));
   }catch(e){}
   if(!state || !state.titles || !state.titles.length){
     state = { masters: JSON.parse(JSON.stringify(DEFAULT_MASTERS)), titles: JSON.parse(JSON.stringify(SEED)) };
@@ -1214,6 +1230,8 @@ function render(){
 }
 
 function card(t, num, open){
+  t.ratings = t.ratings || {};
+  t.reviews = t.reviews || {};
   const el = document.createElement("article");
   el.className = "card" + (open ? " open" : "");
   el.dataset.id = t.id;
@@ -1546,7 +1564,7 @@ async function doRestore(text){
   let parsed;
   try{ parsed = JSON.parse(text); }
   catch(e){ toast("Это не похоже на бэкап: не читается JSON"); return; }
-  const st = parsed && parsed.state ? parsed.state : parsed;
+  const st = normalizeState(parsed && parsed.state ? parsed.state : parsed);
   if(!st || !Array.isArray(st.titles) || !st.titles.length){
     toast("В бэкапе нет тайтлов — восстановление отменено"); return;
   }
@@ -1584,6 +1602,7 @@ document.getElementById("masterCancel").addEventListener("click", ()=>{
 document.getElementById("masterSave").addEventListener("click", async ()=>{
   const name = document.getElementById("masterName").value.trim();
   if(!name){ toast("Мастеру нужно имя"); return; }
+  if(/[.#$/\[\]]/.test(name)){ toast("Без символов . # $ / [ ] в имени — база их не переваривает"); return; }
   if(state.masters.some(m=>m.name.toLowerCase()===name.toLowerCase())){ toast("Такой Мастер уже в войне"); return; }
   const used = new Set(state.masters.map(m=>m.color));
   const color = COLOR_POOL.find(c=>!used.has(c)) || COLOR_POOL[state.masters.length % COLOR_POOL.length];
