@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FATE · Хроники Войны за Грааль</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0b0d16;
+    --night-2:#111527;
+    --panel:#151a30;
+    --panel-2:#1b2140;
+    --line:#2a3157;
+    --crimson:#d03a3a;
+    --crimson-deep:#8e1f26;
+    --gold:#d9b45b;
+    --gold-soft:#b7975a;
+    --moon:#8fa4cc;
+    --ink:#e9e6da;
+    --ink-dim:#a9aec4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--night);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -5%, rgba(142,31,38,.28), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 85% 15%, rgba(217,180,91,.06), transparent 70%);
+    background-attachment:fixed;
+    min-height:100vh;
+  }
+  ::selection{background:var(--crimson-deep);color:#fff}
+
+  .wrap{max-width:940px;margin:0 auto;padding:0 20px 120px}
+
+  /* ---------- HERO ---------- */
+  header{padding:72px 0 40px;text-align:center;position:relative}
+  .seal{
+    width:124px;height:124px;margin:0 auto 26px;position:relative;
+    animation:sealPulse 5s ease-in-out infinite;
+  }
+  @keyframes sealPulse{0%,100%{filter:drop-shadow(0 0 6px rgba(208,58,58,.45))}50%{filter:drop-shadow(0 0 18px rgba(208,58,58,.8))}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .seal .ring-a{animation:spin 70s linear infinite;transform-origin:60px 60px}
+  .seal .ring-b{animation:spin 110s linear infinite reverse;transform-origin:60px 60px}
+  .hero-bg{
+    position:absolute;left:50%;top:-60px;transform:translateX(-50%);
+    width:560px;height:560px;max-width:120vw;opacity:.07;pointer-events:none;z-index:-1;
+  }
+  .hero-bg svg{width:100%;height:100%;animation:spin 140s linear infinite;transform-origin:50% 50%}
+  @media (prefers-reduced-motion: reduce){
+    .seal{animation:none}
+    .seal .ring-a,.seal .ring-b,.hero-bg svg{animation:none}
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.35em;
+    text-transform:uppercase;color:var(--crimson);margin-bottom:14px;
+  }
+  h1{
+    font-family:'Cormorant',Georgia,serif;font-weight:700;
+    font-size:clamp(40px,7vw,64px);line-height:1.05;letter-spacing:.02em;
+  }
+  h1 .thin{font-weight:400;font-style:italic;color:var(--gold)}
+  .sub{color:var(--ink-dim);margin-top:14px;font-size:15px}
+  .masters{
+    display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center;
+  }
+  .master-chip{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;
+    padding:5px 14px;border-radius:2px;border:1px solid var(--line);
+    background:var(--night-2);
+  }
+  .master-chip i{display:inline-block;width:7px;height:7px;margin-right:8px;transform:rotate(45deg);border-radius:1px}
+  .mc-ico{
+    display:inline-flex;width:15px;height:15px;margin-right:7px;vertical-align:-3px;
+    cursor:pointer;transition:filter .15s;
+  }
+  .mc-ico svg{width:100%;height:100%}
+  .mc-ico:hover{filter:brightness(1.5) drop-shadow(0 0 3px currentColor)}
+  .rv-ico{display:inline-flex;width:15px;height:15px;align-self:center}
+  .rv-ico svg{width:100%;height:100%}
+  .master-add{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;
+    padding:5px 14px;border-radius:2px;border:1px dashed var(--line);
+    background:transparent;color:var(--ink-dim);cursor:pointer;
+  }
+  .master-add:hover{border-color:var(--gold-soft);color:var(--gold)}
+  .master-form{display:none;justify-content:center;gap:8px;margin-top:14px}
+  .master-form.show{display:flex;animation:fadeIn .25s ease}
+  .master-form input{
+    background:var(--night-2);border:1px solid var(--line);color:var(--ink);
+    font-family:'Inter',sans-serif;font-size:13px;padding:8px 12px;border-radius:2px;width:200px;
+  }
+  .master-form input:focus{outline:2px solid var(--gold);outline-offset:-1px}
+
+  .stats{
+    display:flex;justify-content:center;gap:0;margin-top:36px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .stat{padding:16px 28px;text-align:center}
+  .stat + .stat{border-left:1px solid var(--line)}
+  .stat b{font-family:'Cormorant',serif;font-size:30px;font-weight:700;color:var(--gold);display:block;line-height:1.1}
+  .stat span{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim)}
+
+  /* ---------- SERIES ---------- */
+  .series{margin-top:56px}
+  .series-head{
+    display:flex;align-items:baseline;gap:16px;margin-bottom:18px;
+  }
+  .series-head .s-mark{width:18px;height:18px;flex-shrink:0;align-self:center;display:inline-flex}
+  .series-head .s-mark svg{width:100%;height:100%}
+  .series-head h2{
+    font-family:'Cormorant',Georgia,serif;font-weight:600;font-size:27px;
+    letter-spacing:.02em;white-space:nowrap;
+  }
+  .series-head .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+  .series-head .cnt{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);letter-spacing:.1em}
+
+  /* ---------- CARD ---------- */
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:4px;
+    margin-bottom:14px;overflow:hidden;transition:border-color .25s;
+  }
+  .card:hover{border-color:#3a4374}
+  .card-top{
+    display:flex;align-items:center;gap:14px;padding:14px 18px 14px 14px;cursor:pointer;
+    user-select:none;background:none;border:none;width:100%;text-align:left;color:inherit;font:inherit;
+  }
+  .card-top:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+  .idx{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);
+    letter-spacing:.05em;flex-shrink:0;width:22px;text-align:right;
+  }
+  .poster-slot{flex-shrink:0;position:relative;width:62px;height:88px}
+  .poster{
+    width:62px;height:88px;border-radius:3px;border:1px solid var(--line);
+    object-fit:cover;display:block;background:var(--night-2);
+  }
+  .poster-ph{
+    width:62px;height:88px;border-radius:3px;border:1px solid var(--line);
+    border-top:2px solid var(--acc,var(--gold));
+    background:linear-gradient(165deg,var(--panel-2),var(--night-2) 70%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  }
+  .poster-ph .ph-letter{
+    font-family:'Cormorant',serif;font-size:30px;font-weight:700;line-height:1;
+    color:var(--acc,var(--gold));
+  }
+  .poster-ph .ph-kind{
+    font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink-dim);
+  }
+  .avg{
+    flex-shrink:0;width:56px;height:56px;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .avg svg{position:absolute;inset:0;width:100%;height:100%}
+  .avg b{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;position:relative}
+  .avg .nul{color:var(--ink-dim);font-size:13px;font-weight:500}
+  .card-titles{flex:1;min-width:0}
+  .card-titles h3{
+    font-family:'Cormorant',Georgia,serif;font-weight:700;font-size:20px;line-height:1.2;
+  }
+  .sub-line{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+  .kind{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+    padding:2px 7px;border:1px solid var(--line);border-radius:2px;color:var(--moon);flex-shrink:0;
+  }
+  .kind.film{color:var(--gold);border-color:#4d4223}
+  .sub-line p{font-size:11.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meta-line{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.05em;
+    color:var(--moon);margin-top:3px;
+  }
+  .meta-line .ongoing{color:#8fd49a;text-transform:uppercase;letter-spacing:.12em;font-size:9.5px}
+  .mini-ratings{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:150px}
+  .mini{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    padding:3px 7px;border-radius:2px;background:var(--night-2);
+    border:1px solid var(--line);
+  }
+  .chev{flex-shrink:0;color:var(--ink-dim);transition:transform .3s;font-size:12px;margin-left:2px}
+  .card.open .chev{transform:rotate(180deg)}
+
+  .card-body{display:none;border-top:1px solid var(--line);padding:20px}
+  .card.open .card-body{display:block;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  .review{
+    border-left:2px solid var(--line);padding:10px 0 10px 16px;margin-bottom:16px;
+  }
+  .review-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  .review-head b{font-family:'Cormorant',serif;font-size:17px;font-weight:700;letter-spacing:.03em}
+  .review-head .score{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+  .review p{color:var(--ink-dim);font-size:14px;white-space:pre-line}
+  .review-media{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .review-media img{
+    height:96px;max-width:170px;object-fit:cover;display:block;
+    border:1px solid var(--line);border-radius:3px;cursor:zoom-in;transition:border-color .2s;
+  }
+  .review-media img:hover{border-color:var(--gold-soft)}
+  .vmedia{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .vmedia:empty{display:none}
+  .vthumb{position:relative}
+  .vthumb img{height:64px;display:block;border:1px solid var(--line);border-radius:3px}
+  .vthumb button{
+    position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+    border:none;background:var(--crimson-deep);color:#fff;font-size:11px;line-height:1;cursor:pointer;
+  }
+  .vthumb button:hover{background:var(--crimson)}
+  .lightbox{
+    position:fixed;inset:0;background:rgba(5,6,12,.93);z-index:100;
+    display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;
+  }
+  .lightbox.show{display:flex;animation:fadeIn .2s ease}
+  .lightbox img{max-width:100%;max-height:100%;border:1px solid var(--line);border-radius:4px}
+  .no-reviews{color:var(--ink-dim);font-style:italic;font-size:14px}
+
+  .card-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+
+  /* ---------- VERDICT FORM ---------- */
+  .verdict-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:transparent;border:1px solid var(--crimson-deep);color:var(--crimson);
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+    padding:9px 18px;border-radius:2px;cursor:pointer;transition:all .2s;
+  }
+  .verdict-btn:hover{background:var(--crimson-deep);color:#fff}
+  .verdict-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  .vform{margin-top:18px;padding:18px;background:var(--night-2);border:1px solid var(--line);border-radius:4px;display:none}
+  .vform.show{display:block;animation:fadeIn .25s ease}
+  .vform label,.add-form label{display:block;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px}
+  .who-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .who{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 16px;border-radius:2px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;
+  }
+  .who svg{width:14px;height:14px;flex-shrink:0}
+  .who:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .who.sel{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset}
+  .score-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+  .score-btns{display:flex;gap:6px;flex-wrap:wrap}
+  .sbtn{
+    width:34px;height:34px;border:1px solid var(--line);border-radius:2px;background:var(--panel);
+    color:var(--ink-dim);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    cursor:pointer;transition:all .15s;
+  }
+  .sbtn:hover{border-color:var(--gold-soft);color:var(--gold)}
+  .sbtn.sel{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#1a1408;border-color:var(--gold)}
+  .score-num{
+    width:88px;background:var(--panel);border:1px solid var(--line);color:var(--gold);
+    font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;text-align:center;
+    padding:8px;border-radius:2px;
+  }
+  .score-num:focus{outline:2px solid var(--gold);outline-offset:-1px}
+  textarea{
+    width:100%;min-height:90px;background:var(--panel);border:1px solid var(--line);
+    color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;padding:12px;border-radius:2px;resize:vertical;
+  }
+  textarea:focus{outline:2px solid var(--gold);outline-offset:-1px}
+  .vform-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn-gold{
+    background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#1a1408;border:none;
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    padding:10px 22px;border-radius:2px;cursor:pointer;
+  }
+  .btn-gold:hover{filter:brightness(1.1)}
+  .btn-gold:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+    padding:10px 18px;border-radius:2px;cursor:pointer;
+  }
+  .btn-ghost:hover{border-color:var(--ink-dim);color:var(--ink)}
+  .btn-danger{border-color:var(--crimson-deep);color:var(--crimson)}
+  .btn-danger:hover{border-color:var(--crimson);color:var(--crimson)}
+  .armed{background:var(--crimson-deep) !important;color:#fff !important;border-color:var(--crimson) !important;animation:armPulse 1s ease-in-out infinite}
+  @keyframes armPulse{0%,100%{box-shadow:0 0 0 0 rgba(208,58,58,.5)}50%{box-shadow:0 0 12px 2px rgba(208,58,58,.5)}}
+
+  /* ---------- ADD TITLE ---------- */
+  .add-zone{margin-top:56px;text-align:center}
+  .add-form{
+    display:none;margin-top:20px;padding:22px;background:var(--panel);
+    border:1px solid var(--line);border-radius:4px;text-align:left;
+  }
+  .add-form.show{display:block;animation:fadeIn .25s ease}
+  .add-form input[type=text],.add-form select{
+    width:100%;background:var(--night-2);border:1px solid var(--line);color:var(--ink);
+    font-family:'Inter',sans-serif;font-size:14px;padding:10px 12px;border-radius:2px;margin-bottom:12px;
+  }
+  .add-form input[type=text]:focus,.add-form select:focus{outline:2px solid var(--gold);outline-offset:-1px}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-top:80px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  footer p{font-size:12px;color:var(--ink-dim)}
+  .banner{
+    position:fixed;bottom:0;left:0;right:0;background:var(--crimson-deep);color:#fff;
+    font-size:13px;text-align:center;padding:10px 16px;display:none;z-index:50;
+  }
+  .banner.show{display:block}
+  .note{
+    margin:24px 0 0;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--gold-soft);
+    border-radius:2px;font-size:13px;color:var(--ink-dim);display:none;background:var(--night-2);
+  }
+  .note.show{display:block}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--panel-2);border:1px solid var(--gold-soft);color:var(--gold);
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;
+    padding:12px 24px;border-radius:2px;transition:transform .3s ease;z-index:60;pointer-events:none;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ---------- QUICK NAV ---------- */
+  .qnav{
+    position:sticky;top:0;z-index:40;
+    background:rgba(11,13,22,.9);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    margin:0 -20px;padding:10px 20px;
+    display:flex;gap:12px;align-items:center;
+  }
+  .qnav input[type=search]{
+    flex-shrink:0;width:190px;background:var(--night-2);border:1px solid var(--line);
+    color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;
+    padding:8px 12px;border-radius:2px;
+  }
+  .qnav input[type=search]:focus{outline:2px solid var(--gold);outline-offset:-1px}
+  .qnav-chips{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;
+    scrollbar-width:none;-ms-overflow-style:none;
+    cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-x;
+  }
+  .qnav-chips::-webkit-scrollbar{display:none}
+  .qnav-chips.dragging{cursor:grabbing}
+  .qchip{
+    flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;
+    padding:6px 12px;border:1px solid var(--line);border-radius:2px;
+    background:transparent;cursor:pointer;
+    color:var(--ink-dim);text-decoration:none;white-space:nowrap;
+    border-left:3px solid var(--c,var(--line));transition:all .15s;
+  }
+  .qchip:hover{color:var(--ink);border-color:var(--c,var(--ink-dim))}
+  .series{scroll-margin-top:78px}
+
+  /* ---------- MASTER DELETE ---------- */
+  .master-x{
+    background:none;border:none;color:var(--ink-dim);cursor:pointer;
+    font:inherit;font-size:13px;margin-left:8px;padding:0 2px;line-height:1;
+  }
+  .master-x:hover{color:var(--crimson)}
+  .master-x.armed-x{color:#fff;background:var(--crimson-deep);border-radius:2px;padding:1px 6px;font-size:10px;letter-spacing:.05em}
+  .gone{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-dim);border:1px solid var(--line);border-radius:2px;padding:1px 6px;
+  }
+
+  /* ---------- BACKUP ---------- */
+  .backup{margin-top:56px;border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+  .backup-head button{width:100%;text-align:left;border:none;background:none;padding:16px 20px;cursor:pointer;
+    color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase}
+  .backup-panel{display:none;padding:0 20px 20px;border-top:1px solid var(--line)}
+  .backup-panel.show{display:block;animation:fadeIn .25s ease}
+  .backup-panel > p{font-size:13px;color:var(--ink-dim);margin:14px 0}
+  .backup-panel textarea{min-height:110px;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+  @media(max-width:680px){
+    .mini-ratings{display:none}
+    .idx{display:none}
+    .stat{padding:14px 16px}
+    .card-top{gap:12px;padding:12px}
+    .poster-slot,.poster,.poster-ph{width:52px;height:74px}
+    .avg{width:48px;height:48px}
+    .avg b{font-size:12px}
+    .sub-line p{white-space:normal}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hero-bg" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="96" stroke="#d9b45b" stroke-width=".6"/>
+        <circle cx="100" cy="100" r="88" stroke="#d03a3a" stroke-width=".5" stroke-dasharray="2 5"/>
+        <circle cx="100" cy="100" r="64" stroke="#d9b45b" stroke-width=".5"/>
+        <path d="M100 12 L176 144 L24 144 Z" stroke="#8e1f26" stroke-width=".6"/>
+        <path d="M100 188 L24 56 L176 56 Z" stroke="#8e1f26" stroke-width=".6"/>
+        <circle cx="100" cy="100" r="30" stroke="#d03a3a" stroke-width=".5" stroke-dasharray="8 4 2 4"/>
+      </svg>
+    </div>
+    <div class="seal">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="ring-a">
+          <circle cx="60" cy="60" r="57" stroke="#8e1f26" stroke-width="1.5"/>
+          <circle cx="60" cy="60" r="52" stroke="#d03a3a" stroke-width="1" stroke-dasharray="3 6"/>
+        </g>
+        <g class="ring-b">
+          <circle cx="60" cy="60" r="45" stroke="#b7975a" stroke-width=".8" stroke-dasharray="10 4 2 4"/>
+          <path d="M60 17 L97 81 L23 81 Z" stroke="#8e1f26" stroke-width="1"/>
+          <path d="M60 103 L23 39 L97 39 Z" stroke="#8e1f26" stroke-width="1"/>
+        </g>
+        <circle cx="60" cy="60" r="27" stroke="#d03a3a" stroke-width="1"/>
+        <path d="M60 34 L70 56 L60 51 L50 56 Z" fill="#d03a3a"/>
+        <path d="M60 86 L70 64 L60 69 L50 64 Z" fill="#d03a3a"/>
+        <path d="M34 60 L56 50 L51 60 L56 70 Z" fill="#8e1f26"/>
+        <path d="M86 60 L64 50 L69 60 L64 70 Z" fill="#8e1f26"/>
+        <circle cx="60" cy="60" r="6" fill="#d9b45b"/>
+      </svg>
+    </div>
+    <div class="eyebrow">Хроники совместного просмотра</div>
+    <h1>Война за Грааль<br><span class="thin">вердикты Мастеров</span></h1>
+    <p class="sub">Каждый тайтл франшизы Fate предстаёт перед судом. Пощады не будет.</p>
+    <div class="masters" id="mastersRow"></div>
+    <div class="master-form" id="masterForm">
+      <input type="text" id="masterName" placeholder="Имя нового Мастера" maxlength="20">
+      <button class="btn-gold" id="masterSave">Заключить контракт</button>
+      <button class="btn-ghost" id="masterCancel">Отмена</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="statWatched">—</b><span>оценено</span></div>
+      <div class="stat"><b id="statAvg">—</b><span>средняя</span></div>
+      <div class="stat"><b id="statBest">—</b><span>пик</span></div>
+    </div>
+  </header>
+
+  <nav class="qnav" aria-label="Быстрый переход">
+    <div class="qnav-chips" id="qnavChips"></div>
+  </nav>
+
+  <div class="note" id="setupNote">
+    Общая база не подключена — сайт пока работает только на этом устройстве.
+    Открой файл index.html, найди вверху скрипта строку <b>const DB_URL = ""</b>
+    и вставь туда URL своей базы Firebase (пошаговая инструкция — в комментарии прямо над этой строкой).
+  </div>
+
+  <main id="app"></main>
+
+  <div class="add-zone">
+    <button class="verdict-btn" id="addToggle">✛ &nbsp;Призвать новый тайтл</button>
+    <div class="add-form" id="addForm">
+      <label>Название (русское)</label>
+      <input type="text" id="addRu" placeholder="Судьба/Реквием">
+      <label>Название (оригинал — по нему найдётся постер)</label>
+      <input type="text" id="addEn" placeholder="Fate/Requiem">
+      <label>Раздел (существующий или новый)</label>
+      <input type="text" id="addSeries" list="seriesList" placeholder="Fate/Grand Order">
+      <datalist id="seriesList"></datalist>
+      <label>Тип</label>
+      <select id="addKind">
+        <option>Сезон</option>
+        <option>Фильм</option>
+        <option>OVA</option>
+        <option>Спешлы</option>
+        <option>ONA</option>
+      </select>
+      <div class="vform-actions">
+        <button class="btn-gold" id="addSave">Призвать</button>
+        <button class="btn-ghost" id="addCancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="backup">
+    <div class="backup-head"><button id="backupToggle">⛨ &nbsp;Бэкап и восстановление</button></div>
+    <div class="backup-panel" id="backupPanel">
+      <p>Снимок всех данных: Мастера, тайтлы, оценки, отзывы и постеры. Скачивай бэкап после важных изменений — если что-то пойдёт не так, восстановишь всё одним файлом. Восстановление перезапишет текущие данные у всех.</p>
+      <div class="vform-actions">
+        <button class="btn-gold" id="backupDownload">Скачать бэкап</button>
+        <button class="btn-ghost" id="backupShow">Показать текстом</button>
+        <button class="btn-ghost" id="restoreFileBtn">Восстановить из файла</button>
+        <button class="btn-ghost btn-danger" id="restoreTextBtn">Восстановить из текста</button>
+      </div>
+      <textarea id="backupText" style="margin-top:14px" spellcheck="false" placeholder="Сюда можно вставить текст бэкапа для восстановления — или нажми «Показать текстом», чтобы скопировать текущий."></textarea>
+    </div>
+  </div>
+
+  <input type="file" id="restoreFile" accept=".json,.txt,application/json" style="display:none">
+  <input type="file" id="posterFile" accept="image/*" style="display:none">
+  <input type="file" id="memeFile" accept="image/*" multiple style="display:none">
+</div>
+
+<div class="lightbox" id="lightbox"><img alt="Просмотр картинки"></div>
+
+<div class="banner" id="banner">Нет связи с базой — изменения сохранены на этом устройстве и уедут в базу, когда связь вернётся.</div>
+<div class="toast" id="toast">Вердикт записан в Грааль</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Данные из HottieAss.xlsx + вся вышедшая франшиза
+   ============================================================ */
+const DEFAULT_MASTERS = [
+  {name:"Даниэле", color:"#d9b45b"},
+  {name:"Ксюша",   color:"#e07a9a"},
+  {name:"Рома",    color:"#6fa3e0"},
+  {name:"Паша",    color:"#7fbf8e"}
+];
+const COLOR_POOL = ["#d9b45b","#e07a9a","#6fa3e0","#7fbf8e","#c98ae0","#e0a06f","#6fd8d0","#d8e06f","#a3e06f","#e06f6f","#8fa4cc","#e0c46f"];
+
+/* ============================================================
+   Семь классов Слуг
+   ============================================================ */
+const CLASSES = [
+  ["saber","Сэйбер"],["archer","Арчер"],["lancer","Лансер"],
+  ["rider","Райдер"],["caster","Кастер"],["assassin","Ассасин"],["berserker","Берсеркер"]
+];
+const CLASS_ICONS = {
+  saber:     '<path d="M12 2v13"/><path d="M8 15h8"/><path d="M12 15v4"/><circle cx="12" cy="20.3" r="1.2"/>',
+  archer:    '<path d="M7 3q11 9 0 18"/><path d="M7 3v18"/><path d="M4 12h16m0 0-3.5-3M20 12l-3.5 3"/>',
+  lancer:    '<path d="M4 20 18 6"/><path d="M18 6l.8-4.2L14.6 2.6"/><path d="M6 4l14 16"/><path d="M20 20l-.8-4.2-3.4 1"/>',
+  rider:     '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5v15M4.5 12h15M6.7 6.7l10.6 10.6M17.3 6.7 6.7 17.3"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+  caster:    '<path d="M12 9.5V21"/><circle cx="12" cy="5.8" r="2.9"/><path d="M18.5 9v3M17 10.5h3M4.5 3.5v3M3 5h3"/>',
+  assassin:  '<path d="M12 3a6.5 6.5 0 0 0-6.5 6.5c0 2.6 1.4 4.3 3 5.3V18h7v-3.2c1.6-1 3-2.7 3-5.3A6.5 6.5 0 0 0 12 3z"/><circle cx="9.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><path d="M10 18v2.3M12 18v2.3M14 18v2.3"/>',
+  berserker: '<path d="M4 4l4 6-2 1 4 7"/><path d="M10 3l4 6-2 1 4 7"/><path d="M16 2l3 6-1.5 1 3.5 7"/>'
+};
+const DEFAULT_CLS = {"Даниэле":"archer","Ксюша":"berserker","Рома":"rider","Паша":"lancer"};
+
+function clsOf(m){ return (m && m.cls) || DEFAULT_CLS[m && m.name] || "saber"; }
+function clsOfName(name){
+  const m = state.masters.find(mm=>mm.name===name);
+  return m ? clsOf(m) : (DEFAULT_CLS[name] || "saber");
+}
+function clsName(cls){
+  const c = CLASSES.find(x=>x[0]===cls);
+  return c ? c[1] : cls;
+}
+function clsIcon(cls){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CLASS_ICONS[cls]||CLASS_ICONS.saber}</svg>`;
+}
+/* малая печать раздела */
+function seriesMarkSVG(color){
+  return `<svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <circle cx="10" cy="10" r="8.5" stroke="${color}" stroke-width="1"/>
+    <circle cx="10" cy="10" r="5.5" stroke="${color}" stroke-width=".7" stroke-dasharray="2 2.5"/>
+    <path d="M10 6.6 L12.6 10 L10 13.4 L7.4 10 Z" fill="${color}"/>
+  </svg>`;
+}
+
+/* T(id, раздел, тип, русское, оригинал, запрос-для-постера, оценки, отзывы) */
+function T(id, series, kind, ru, en, q, ratings, reviews){
+  return {id, series, kind, ru, en, q, img:null, ratings: ratings||{}, reviews: reviews||{}};
+}
+
+const SEED = [
+  /* ---------- Fate/Prototype ---------- */
+  T("prototype","Fate/Prototype","OVA","Судьба/Прототип","Fate/Prototype","Fate/Prototype",
+    {"Даниэле":4,"Ксюша":4,"Рома":5},
+    {"Даниэле":"Было бы славно увидеть данное произведение, но к сожалению мы узнаем в 10-минутном ролике, что Сейбер мог быть мужиком, а не женщиной-рыцарем. Хыхыхаха",
+     "Ксюша":"хуйня",
+     "Рома":"Пойдёт, как трейлер очень даже ничего, а ещё Сейбер мужик PogChamp. Я бы фулл посмотрел",
+     "Паша":"Не смотрел"}),
+
+  /* ---------- Fate/Zero ---------- */
+  T("zero1","Fate/Zero","Сезон","Судьба/Начало — 1 сезон","Fate/Zero","Fate/Zero",
+    {"Даниэле":7,"Ксюша":4,"Рома":7.5,"Паша":7},
+    {"Даниэле":"Первый сезон можно назвать взлётной полосой ко второму: нас знакомят с лором мира и с тем, какие героические души будут сражаться за Святой Грааль. По итогу нас готовят к сильному финалу, который по идее должен быть грандиозным... Так ведь?",
+     "Ксюша":"хуйня",
+     "Рома":"Это просто охуенно, единственный минус — мало годных заруб. Искандер уважаемый мужик, я бы с ним забухал. Гильгамеш топ вайфу, отсос вне очереди",
+     "Паша":"Рисовка кайф. Диалогов много. Мало экшена. Стэнды душевные, носители стэндов реалистичные и нудные. Антимаг наводит суеты (красава), малой терпит, добряк верит, что его не наёбывают, варвар красава (не душит), копьеносец норм мужик (силён батон), чел в золотой броне — типикал выпендрёжник с богатым папой. Ассасина жалко рил — мне он нравился"}),
+
+  T("zero2","Fate/Zero","Сезон","Судьба/Начало — 2 сезон","Fate/Zero 2nd Season","Fate/Zero 2nd Season",
+    {"Даниэле":8,"Ксюша":4,"Рома":8.5,"Паша":9},
+    {"Даниэле":"2 сезон «Начала» — кульминация всех закинутых удочек Кирицуги. В очередной раз смотрю его предысторию и понимаю, как же хорошо она прописана по сравнению с другими персонажами. Дуэт Райдера и его хозяина выше похвал — они у меня в сердечке. Гильгамеш как всегда на своём пафосе вывозит харизмой, Кирей вообще имба патча. Но хронометраж был мал, есть сюжетные дыры, а последние серии заканчиваются слишком быстро — остаётся неприятное послевкусие. В общем и целом Fate/Zero — добротная анимка, которая даёт хороший старт для знакомства с основной сюжетной линией Fate/Stay Night.",
+     "Ксюша":"хуйня",
+     "Рома":"8,5/10 — только из-за концовки, так бы больше было. Продолжение не хуже 1 сезона, местами даже лучше! Пиздец жалко братка с жуками, я ебал, автоподстава, очень грустно. Лансера тоже жалко: пожертвовал копьём, мастер мало того что пидор, так ещё и суицид ему оформил, АНЛАК. Керри топчик, чётко проработан, но не такой охуенный, как Искандер — какой же он пиздатый. 10 серия — синема, я в ахуе. Концовка кусок дерьма, нихуя не объяснили, кто не шарит — жрите говно.",
+     "Паша":"Варвар и школотрон тупо раскуривают кальян, пока все остальные суетятся (А ИМ ПОЕБАТЬ, ОНИ В КАЛЬЯНКЕ). Чел в броне показал яйца (но по-прежнему богатый папа решает), респект что убили его хозяина. Добряка наёбывают все кому не лень, в итоге добряк душит сестру (ой странно, а в школе всегда такой спокойный ходил, с одноклассниками не разговаривал — знаете эту тему?))) Антимаг выдаёт лютейшую многоходовочку по тактикам Кунмина, пока наше любимое дуо тупо курит кальян. Сейбер по базе может только ныть и бить сковородкой раз в 6 серий. Кастер красава — фиданул и давай отдыхай. Концовка — это ебаная шиза (насрали и не убрали). Концовка = руина"}),
+
+  T("zeroremix","Fate/Zero","Спешлы","Пожалуйста! Консультация Айнцбернов","Fate/Zero: Onegai! Einzbern Soudanshitsu","Fate/Zero Onegai Einzbern Soudanshitsu",{},{}),
+
+  /* ---------- Fate/Stay Night (Studio Deen) ---------- */
+  T("fsn2006","Fate/Stay Night","Сезон","Судьба/Ночь схватки (2006)","Fate/stay night","Fate/stay night",
+    {"Даниэле":3,"Ксюша":4,"Рома":3,"Паша":4},
+    {"Даниэле":"Это ебаный резидент слипер — самый худший и нудный рут в F\\SN. Адаптация полный кал: затянутые диалоги, ненужные сцены кринж-фансервиса. Будь я мёртв — перевернулся бы в гробу. Широ — эталон непоколебимого девственного «Сосуда». Жаль, Кирея тут тупо занизили, чтобы этот Шишка-девственник победил его тупым и нелепым образом. ЕЩЁ РАЗ: ЭТО САМЫЙ ХУДШИЙ ФЕЙТ ИЗ ВСЕГО, ЧТО Я СМОТРЕЛ. P.S. Ебало тех, кто доказывает мне, что этот тайтл годнота →",
+     "Ксюша":"а драки будут? ну или хотя бы ебля.... (тем более хуйня)",
+     "Рома":"Если вам кажется, что на протяжении всех серий вам пихают говно в рот — вам не показалось, наслаждайтесь. Нихуя не происходит от слова совсем. Но отдаю создателям должное: надо постараться сделать настолько умственно отсталого гг, 10 айкью. Керри бы заплакал, увидев, что он делает. Анимация дерьма, диалоги дерьма, мастера долбоёбы (все без исключений). P.S. Кирей в финальном файте кидался говном и проиграл LUL",
+     "Паша":"Че за дерьмище ебаное? Где я? А, я на 5-ой войне за Грааль, лол... +1 балл за сиськи (хотя бы кусочек)"}),
+
+  T("fsndeenubw","Fate/Stay Night","Фильм","Судьба/Ночь схватки: UBW — фильм (2010, Deen)","Fate/stay night Movie: Unlimited Blade Works","Fate/stay night Movie Unlimited Blade Works",{},{}),
+
+  /* ---------- Unlimited Blade Works (ufotable) ---------- */
+  T("ubw0","Unlimited Blade Works","Спешлы","UBW — Пролог","Fate/stay night: UBW · Prologue","Fate/stay night Unlimited Blade Works Prologue",
+    {"Даниэле":8,"Ксюша":6,"Рома":8,"Паша":9},
+    {"Даниэле":"Воооот, вот это я понимаю годнота, УВАЖАЕМАЯ СТУДИЯ. Долго писать не буду — это только пролог: первые несколько дней от лица Рин, как она призвала героическую душу и как повстречалась с нашим ГГ. P.S. Значок «W» будет применяться как звёзды Мишлен к следующим картинам — знак качества.",
+     "Ксюша":"намана (не хуйня)",
+     "Рома":"Как бальзам на душу после предыдущей хуйни, анимация годнота. Только Рин пиздец руинит, но надеюсь, это временная акция. Арчер какой-то ебануто умный хуй, который много пиздит даже мастеру. Явно гигачад — дал пизды Лансеру на мечах, будучи лучником LUL LUL LUL"}),
+
+  T("ubw1","Unlimited Blade Works","Сезон","UBW — 1 сезон","Fate/stay night: Unlimited Blade Works","Fate/stay night Unlimited Blade Works TV",
+    {"Даниэле":9,"Ксюша":7,"Рома":5},
+    {"Даниэле":"В 2011 студия выпустила Zero, где частично применяла 2D и 3D — и это был колоссальный прорыв. В 2014 выходит это аниме, и эти психи переплюнули себя в несколько раз: картинка сочнее, анимация на новом уровне, 3D вообще незаметно. Огромный респект студии. По сюжету — не устаёшь от диалогов, по полочкам объясняют концепцию войны, у каждого свои амбиции. ГГ немного наивен, но его можно понять — мозгом тут является «лучшая девочка фейта» Тосака Рин, она тащит мувами и смекалкой. Этот сезон — экскурс по раскрытию персонажей и подготовка к эпику второго сезона!",
+     "Ксюша":"намана (не хуйня)",
+     "Рома":"Графон пиздатый, всё заебись, интересный сюжет. Уберите ебаната с главного героя, который срёт везде, где видит. Кринж прямо в сердце — без него было бы от 8 до 10 баллов. P.S. Илюху жалко, потушили ни за что. И жаль, что Геракл оказался попуском, хотя должен был ебать всё, что видит, анлак"}),
+
+  T("ubw2","Unlimited Blade Works","Сезон","UBW — 2 сезон","Fate/stay night: Unlimited Blade Works 2nd Season","Fate/stay night Unlimited Blade Works 2nd Season",
+    {"Даниэле":10,"Ксюша":7,"Рома":5},
+    {"Даниэле":"КАК ГОВОРИТСЯ, РЕБЯТА: «LET THEM COOK!!!» Это просто отвал башки — за такое я полюбил студию и стал фанатом Fate. Сезон раскрывается ярко, как только что открытое игристое. Драки на совершенно другом уровне, пафос выкручен на 100% — а мы ещё не дошли до Heaven's Feel. Противостояние двух совершенно разных мнений — Арчера и Широ. Картина полностью закрывает и битву, и главную мысль героя, избравшего собственный путь. БОГИНЯ СЕЗОНА — ТООСАКААА РИИИН! Кому нужна эта старуха эпохи средневековья, у нас есть сама Тосака Рин! ААААА",
+     "Ксюша":"ну намана (не хуйня)",
+     "Рома":"Классика лансеров — умирать от суицида, БАЗА. Гильгамеша слили как долбоёба: Широ с бустом маны, оказывается, короля героев победить может))))). Арчер тащил как мог, но его не хватает, чтобы закрыть всю хуйню, что сделал Широ. Такого ебаната на гг надо постараться сделать, просто ебаный КРИНЖ. Мув с Широ из будущего реально крутой, понравилось. Кастер тащила достойно"}),
+
+  T("ubwsd","Unlimited Blade Works","Спешлы","UBW — Sunny Day","Fate/stay night: UBW 2nd Season - Sunny Day","Fate/stay night Unlimited Blade Works Sunny Day",
+    {"Даниэле":5,"Ксюша":0,"Рома":4},
+    {"Даниэле":"Просто альтернативная концовка. Фанаты Сейбер, ликуйте.",
+     "Ксюша":"хуйня",
+     "Рома":"Почему два человечка, один из которых бездарь + руинер, могут удерживать Артурию сколько душе угодно, когда Кирей должен был сливать кучу народу, чтобы держать Гильгамеша? А? А? А? Хуйня, вот почему"}),
+
+  /* ---------- Heaven's Feel ---------- */
+  T("hf1","Heaven's Feel","Фильм","HF — I. Presage Flower","Fate/stay night Movie: Heaven's Feel - I","Heaven's Feel I Presage Flower",
+    {"Даниэле":9,"Ксюша":6,"Рома":7.5},
+    {"Даниэле":"Начало интересного рута, где раскрывается лор Сакуры, Синдзи и других персонажей, которым раньше не уделяли внимания. Анимация вышла на новый уровень, видна новая рисовка. Широ здесь совершенно другой — более взрослый, принимает свои недостатки. Ставлю 9: анимация файтов и персонажей идеально гармонирует с полным метром, видно, что бюджета больше и аниматоры не стесняются накидывать годных сцен.",
+     "Ксюша":"что вообще я только что посмотрела... (слишком большой пролог для хентая, итог: хуйня)",
+     "Рома":"Самая лучшая рисовка, что я видел. Нравится, что сюжет не затягивают и всё движется активно. Но в фильме мало запоминающегося: дали всего понемногу — вроде посмотрел, вроде кайф, а моментов, кроме графона, выделить сложно. Верю в нереальнейший камбек в следующих частях. Огромный минус: с середины фильма абсолютно нихуя не понятно, вообще Н И Х У Я не понятно, что происходит."}),
+
+  T("hf2","Heaven's Feel","Фильм","HF — II. Lost Butterfly","Fate/stay night Movie: Heaven's Feel - II","Heaven's Feel II Lost Butterfly",
+    {"Даниэле":10,"Ксюша":10,"Рома":9,"Паша":9.5},
+    {"Даниэле":"Второй полный метр — тотальный синема. Анимация боёв шикарна. Сюжет всё мрачнее, раскрывается предыстория семьи Мато и Сакуры. И нам наконец говорят, кто такая Тень и почему она настолько имбанутая, что уничтожила Гильгамеша парочкой съеденных конечностей. АМ-НЯМ.",
+     "Ксюша":"ну наконец-то секс, ну сколько можно было ждать — однозначный лайк. Второй лайк за отхуяренную руку (несколько рук!), жаль что Широ всё ещё жив... имеются элементы наркотической хуйни (своеобразная хуйня с элементами хентая). За мясорубку + баллы",
+     "Рома":"Одним словом — Синема. Графика, файты. Чего только файт Берсеркера стоит — невозможно оторваться. Драмы навалили предостаточно. В отличие от 1 части повествование замечательное. Ноль минусов, охуенно. P.S. Кирилл кринжа навалил, даже сестру выебал, пиздец",
+     "Паша":"Не уснул (+балл). Рисовка всё ещё заставляет кровь греться от удовольствия. Файты заебца (Берсеркер навалил божественно). ГИГАмеш вроде фиданул, лайк. Ощущение, что смотрю жёсткий сюжет перед хентычем. Много вопросов осталось нераскрытыми, но фильм понравился. Тёмная Сейбер навалила басов (надо отметить). Священник ещё жив."}),
+
+  T("hf3","Heaven's Feel","Фильм","HF — III. Spring Song","Fate/stay night Movie: Heaven's Feel - III","Heaven's Feel III Spring Song",
+    {"Даниэле":10,"Ксюша":1,"Рома":8.5,"Паша":5},
+    {"Даниэле":"Вот и долгожданный финал основной сюжетной линии F\\SN. Ufotable подарила ахуенные части — экранизировала лучшее, что есть в F\\SN: «Клинков бесконечный край» и «Прикосновение небес». Если бы не они, франшиза могла стать ТОТАЛЬНЫМ РАЗОЧАРОВАНИЕМ. Отдельно отмечу OST, опенинги и эндинги — они ахуенные и идеально гармонируют с глобальными файтами: оркестр, инструментал, завораживающий вокал. Отдельный респект за файт Сейбер и Райдер — тотальный разъёб в плане графики и анимации. Heaven's Feel — добротный и годный рут про Сакуру, который углубляет в лор мира F\\SN, если внимательно следить за диалогами. Смотря эту картину, нужно включать мозг и не быть ебланами, которые занижают её из-за тупых комментариев. ЭНИВЕЙ, ЕБАЛО ЛЮДЕЙ, ПОСТАВИВШИХ ЭТОЙ КАРТИНЕ МЕНЬШЕ 10 БАЛЛОВ →",
+     "Ксюша":"НЕУЖЕЛИ ОН НАКОНЕЦ ОТКИНУЛСЯ (на самом деле та ещё хуйня, но за смерть Широ накинула 9 баллов). P.S.: один еблан зачем-то заруинил смерть Широ — забираю подаренные баллы обратно, лучше бы не читала и не портила впечатление...",
+     "Рома":"Снова синема, спасибо, что наконец-то раскрыли сюжет. На удивление, одна из немногих частей, где всё объяснили и закрыли дыры сюжета, респект. Минус за концовку: понять, что он выжил путём воскрешения от Илюхи — анриал, могли бы чуть рассказать, что к чему. В целом минусов нет, охуенно, мне понравилось",
+     "Паша":"Это просто пиздец. Рандомный школьник ВАНШОТАЕТ мечом ЛЕГЕНДАРНОГО Геракла!!! Всё нормально? Лучше бы он наколдовал РПГ, а не меч — это даже выглядело бы реалистичнее. Спасибо, что не убили Рин (хейт к ней всё ещё присутствует). Широ плачет (база). Сакура-лучница — контента навалили. О, сёстры помирились — А ВСЕГО-ТО НАДО БЫЛО ДРУГ ДРУГА ЧУТЬ НЕ ПОУБИВАТЬ. КОНЦОВКА ЗАРЕШАЛА, НАКОНЕЦ-ТО ОН СДОХ — 10/10. САКУРА ЕБАНУЛАСЬ В КРАЙ — жалко её. СУКА, ОН ЖИВ — 5/10"}),
+
+  /* ---------- Prisma☆Illya ---------- */
+  T("illya1","Prisma☆Illya","Сезон","Иллия — 1 сезон","Fate/kaleid liner Prisma☆Illya","Fate/kaleid liner Prisma Illya",
+    {"Даниэле":6,"Ксюша":9.99,"Рома":9.9,"Паша":6},
+    {"Даниэле":"Ля-ля-ля, я девочка-волшебница Иллия, смотрите, я такая милашка, смотрите, я люблю братика Шииииро... Подобие Мадоки, которую словно скрутили в трубку, выкурили по кругу и вытоптали до неузнаваемости. А так в целом добротная анимка, где все живы, где нет войны, где Широ живёт с сёстрами и ВСЁ-ВСЁ-ВСЁ ХОРОШО. Очень ламповая альтернатива мрачной сюжетке F\\SN. Ну и также тут есть ЮРИ. На один раз сезон сойдёт.",
+     "Ксюша":"пока что это лучшее, что мы смотрели (однозначно не хуйня)",
+     "Рома":"Моя мечта — стать ДЕВОЧКОЙ-ВОЛШЕБНИЦЕЙ. Просто синема, годнота, имбуля. Жаль, нет сезонов 20 этого, чтобы всю жизнь только это смотреть. Всем обязательно к просмотру. P.S. Инцест — дело семейное, лесбухи топ",
+     "Паша":"Оцениваю сезон — 3. Оцениваю последнюю серию — 8"}),
+
+  T("illya1sp","Prisma☆Illya","Спешлы","Иллия — 1 сезон · Спешлы","Prisma☆Illya Specials","Fate kaleid liner Prisma Illya Specials",
+    {"Даниэле":6,"Ксюша":9.99,"Рома":9.9,"Паша":5},
+    {"Даниэле":"Фансервис мы уважаем",
+     "Ксюша":"всё так же лучшее, что мы смотрели (всё так же однозначно не хуйня)",
+     "Паша":"Под пивко нормально"}),
+
+  T("illya1ova","Prisma☆Illya","OVA","Иллия — 1 сезон · OVA (Танцы на спортфесте)","Prisma☆Illya: Undoukai de Dance!","Prisma Illya Undoukai de Dance",
+    {"Даниэле":1,"Ксюша":9.98,"Рома":9.9,"Паша":3},
+    {"Даниэле":"Хуета полнейшая",
+     "Ксюша":"я не понимаю, что происходит с их ass, когда они танцуют… (не хуйня)",
+     "Рома":"Ребята, не стоит вскрывать эту тему. Вы молодые, шутливые, вам всё легко. Это не то. Это не Чикатило и даже не архивы спецслужб. Сюда лучше не лезть. Серьёзно, любой из вас будет жалеть. Лучше закройте и забудьте, что тут писалось. Я вполне понимаю, что данным сообщением вызову дополнительный интерес, но хочу сразу предостеречь пытливых — стоп.",
+     "Паша":"Хуйня для даунов"}),
+
+  T("illya2","Prisma☆Illya","Сезон","Иллия — 2 сезон (2wei!)","Fate/kaleid liner Prisma☆Illya 2wei!","Fate/kaleid liner Prisma Illya 2wei!",{},{}),
+  T("illya2sp","Prisma☆Illya","Спешлы","Иллия — 2wei! · Спешлы","Prisma☆Illya 2wei! Specials","Prisma Illya 2wei Specials",{},{}),
+  T("illya2ova","Prisma☆Illya","OVA","Иллия — 2wei! · OVA (Горячие источники)","Prisma☆Illya 2wei!: Mahou Shoujo in Onsen Ryokou","Prisma Illya 2wei Mahou Shoujo in Onsen Ryokou",{},{}),
+  T("illya3","Prisma☆Illya","Сезон","Иллия — 3 сезон (2wei Herz!)","Fate/kaleid liner Prisma☆Illya 2wei Herz!","Fate/kaleid liner Prisma Illya 2wei Herz!",{},{}),
+  T("illya3sp","Prisma☆Illya","Спешлы","Иллия — 2wei Herz! · Спешлы","Prisma☆Illya 2wei Herz! Specials","Prisma Illya 2wei Herz Specials",{},{}),
+  T("illya4","Prisma☆Illya","Сезон","Иллия — 4 сезон (3rei!!)","Fate/kaleid liner Prisma☆Illya 3rei!!","Fate/kaleid liner Prisma Illya 3rei!!",{},{}),
+  T("illya4sp","Prisma☆Illya","Спешлы","Иллия — 3rei!! · Спешлы","Prisma☆Illya 3rei!! Specials","Prisma Illya 3rei Specials",{},{}),
+  T("illyamov1","Prisma☆Illya","Фильм","Иллия — Фильм: Клятва под снегом","Prisma☆Illya Movie: Sekka no Chikai","Prisma Illya Movie Sekka no Chikai Oath Under Snow",{},{}),
+  T("illyaphantasm","Prisma☆Illya","OVA","Иллия — Prisma☆Phantasm","Fate/kaleid liner Prisma☆Illya: Prisma☆Phantasm","Prisma Illya Prisma Phantasm",{},{}),
+  T("illyamov2","Prisma☆Illya","Фильм","Иллия — Фильм: Licht. Безымянная девочка","Prisma☆Illya Movie: Licht - Namae no Nai Shoujo","Prisma Illya Licht Namae no Nai Shoujo",{},{}),
+
+  /* ---------- Карнавальный фантазм ---------- */
+  T("carnival","Карнавальный фантазм","OVA","Карнавальный фантазм","Carnival Phantasm","Carnival Phantasm",{},{}),
+  T("grandcarnival","Карнавальный фантазм","OVA","Fate/Grand Carnival","Fate/Grand Carnival","Fate/Grand Carnival",{},{}),
+
+  /* ---------- Fate/Extra ---------- */
+  T("extra1","Fate/Extra","Сезон","Судьба/Дополнение: Последний бис","Fate/Extra: Last Encore","Fate/Extra Last Encore",{},{}),
+  T("extra2","Fate/Extra","Спешлы","Последний бис — Иллюстрии небесного пути","Fate/Extra: Last Encore - Illustrias Tendousetsu","Fate/Extra Last Encore Illustrias Tendousetsu",{},{}),
+
+  /* ---------- Fate/Apocrypha ---------- */
+  T("apocrypha","Fate/Apocrypha","Сезон","Судьба/Апокриф","Fate/Apocrypha","Fate/Apocrypha",{},{}),
+
+  /* ---------- Fate/Grand Order ---------- */
+  T("fgofirst","Fate/Grand Order","Фильм","FGO — Первый приказ","Fate/Grand Order: First Order","Fate/Grand Order First Order",{},{}),
+  T("fgolostroom","Fate/Grand Order","Спешлы","FGO — Moonlight/Lostroom","Fate/Grand Order: Moonlight/Lostroom","Fate/Grand Order Moonlight Lostroom",{},{}),
+  T("fgobabylonia","Fate/Grand Order","Сезон","FGO — Вавилония","Fate/Grand Order: Zettai Majuu Sensen Babylonia","Fate/Grand Order Babylonia",{},{}),
+  T("fgocamelot1","Fate/Grand Order","Фильм","FGO — Камелот I: Wandering; Agateram","FGO Camelot 1 - Wandering; Agateram","Fate/Grand Order Camelot Wandering Agateram",{},{}),
+  T("fgocamelot2","Fate/Grand Order","Фильм","FGO — Камелот II: Paladin; Agateram","FGO Camelot 2 - Paladin; Agateram","Fate/Grand Order Camelot Paladin Agateram",{},{}),
+  T("fgosolomon","Fate/Grand Order","Фильм","FGO — Соломон","Fate/Grand Order: Kani Jikan Shinden Solomon","Fate/Grand Order Solomon",{},{}),
+
+  /* ---------- Другие миры Fate ---------- */
+  T("emiyagohan","Другие миры Fate","ONA","Сегодняшний обед семьи Эмии","Emiya-san Chi no Kyou no Gohan","Emiya-san Chi no Kyou no Gohan",{},{}),
+  T("elmelloi","Другие миры Fate","Сезон","Дело лорда Эль-Меллоя II: Rail Zeppelin","Lord El-Melloi II Sei no Jikenbo","Lord El-Melloi II Sei no Jikenbo Rail Zeppelin Grace Note",{},{}),
+  T("strangefake","Другие миры Fate","Спешлы","Судьба/Странная подделка: Шёпот рассвета","Fate/strange Fake: Whispers of Dawn","Fate/strange Fake Whispers of Dawn",{},{})
+];
+
+/* ============================================================
+   Метаданные: [год, студия, рейтинг MAL — снимок].
+   Статус у всех «вышел»; живое обновление через Jikan
+   сработает там, где среда не блокирует сеть.
+   ============================================================ */
+const META = {
+  prototype:     ["2011","Lerche",7.0],
+  zero1:         ["2011","ufotable",8.3],
+  zero2:         ["2012","ufotable",8.6],
+  zeroremix:     ["2011","ufotable",7.0],
+  fsn2006:       ["2006","Studio Deen",7.3],
+  fsndeenubw:    ["2010","Studio Deen",7.5],
+  ubw0:          ["2014","ufotable",8.2],
+  ubw1:          ["2014–2015","ufotable",8.2],
+  ubw2:          ["2015","ufotable",8.3],
+  ubwsd:         ["2015","ufotable",7.6],
+  hf1:           ["2017","ufotable",8.2],
+  hf2:           ["2019","ufotable",8.5],
+  hf3:           ["2020","ufotable",8.6],
+  illya1:        ["2013","Silver Link",7.0],
+  illya1sp:      ["2013","Silver Link",6.7],
+  illya1ova:     ["2014","Silver Link",6.6],
+  illya2:        ["2014","Silver Link",7.2],
+  illya2sp:      ["2014","Silver Link",6.7],
+  illya2ova:     ["2015","Silver Link",6.8],
+  illya3:        ["2015","Silver Link",7.3],
+  illya3sp:      ["2015","Silver Link",6.7],
+  illya4:        ["2016","Silver Link",7.5],
+  illya4sp:      ["2016–2017","Silver Link",6.7],
+  illyamov1:     ["2017","Silver Link",7.9],
+  illyaphantasm: ["2019","Silver Link",7.4],
+  illyamov2:     ["2021","Silver Link",7.3],
+  carnival:      ["2011","Lerche",7.6],
+  grandcarnival: ["2021","Lerche",7.3],
+  extra1:        ["2018","Shaft",6.5],
+  extra2:        ["2018","Shaft",6.6],
+  apocrypha:     ["2017","A-1 Pictures",7.2],
+  fgofirst:      ["2016","Lay-duce",7.4],
+  fgolostroom:   ["2017","Lay-duce",7.3],
+  fgobabylonia:  ["2019–2020","CloverWorks",8.5],
+  fgocamelot1:   ["2020","Signal.MD",6.9],
+  fgocamelot2:   ["2021","Production I.G",7.6],
+  fgosolomon:    ["2021","CloverWorks",7.7],
+  emiyagohan:    ["2018","ufotable",7.5],
+  elmelloi:      ["2019","TROYCA",7.4],
+  strangefake:   ["2023","A-1 Pictures",7.9]
+};
+
+/* Справочник по названиям — для тайтлов, добавленных вручную через
+   «Призвать тайтл». Ключ — оригинальное название в нижнем регистре
+   без знаков препинания. Пополняется по запросу. */
+const META_BY_TITLE = {
+  "carnival phantasm ex season":           ["2011","Lerche",7.0],
+  "carnival phantasm hibichika special":   ["2013","Lerche",6.6],
+  "fate grand carnival":                   ["2021","Lerche",7.3],
+  "fate stay night tv reproduction":       ["2010","Studio Deen",7.0],
+  "fate grand order x himuro no tenchi 7 nin no saikyou ijin hen": ["2017","ufotable",6.9],
+  /* Fate/Grand Order */
+  "fate grand order first order":          ["2016","Lay-duce",7.4],
+  "fate grand order moonlight lostroom":   ["2017","Lay-duce",7.3],
+  "fate grand order zettai majuu sensen babylonia initium iter": ["2019","CloverWorks",7.2],
+  "fate grand order zettai majuu sensen babylonia": ["2019–2020","CloverWorks",8.5],
+  "fate grand order shinsei entaku ryouiki camelot 1 wandering agateram": ["2020","Signal.MD",6.9],
+  "fate grand order shinsei entaku ryouiki camelot 2 paladin agateram": ["2021","Production I.G",7.6],
+  "fate grand order shuukyoku tokuiten kani jikan shinden solomon": ["2021","CloverWorks",7.7],
+  "fate grand order kani jikan shinden solomon": ["2021","CloverWorks",7.7],
+  /* Lord El-Melloi II */
+  "lord el melloi ii sei no jikenbo rail zeppelin grace note": ["2019","TROYCA",7.4],
+  "lord el melloi ii sei no jikenbo rail zeppelin grace note special": ["2018","TROYCA",7.2],
+  "lord el melloi ii sei no jikenbo rail zeppelin grace note hakamori to neko to majutsushi": ["2021","TROYCA",7.1],
+  /* Fate/strange Fake */
+  "fate strange fake whispers of dawn":    ["2023","A-1 Pictures",7.9],
+  "fate strange fake":                     ["2024–2026","A-1 Pictures",7.8],
+  /* на случай пере-добавления встроенных */
+  "fate apocrypha":                        ["2017","A-1 Pictures",7.2],
+  "fate extra last encore":                ["2018","Shaft",6.5]
+};
+
+function metaOf(t){
+  if(t.meta && (t.meta.score || t.meta.studio || t.meta.year)) return t.meta;
+  const m = META[t.id] || META_BY_TITLE[normTitle(t.en || t.q || t.ru)];
+  return m ? {year:m[0], studio:m[1], score:m[2], status:"вышел"} : null;
+}
+function metaLineHTML(t){
+  const m = metaOf(t);
+  if(!m) return "";
+  const parts = [];
+  if(m.year) parts.push(esc(m.year));
+  if(m.studio) parts.push(esc(m.studio));
+  if(typeof m.score==="number") parts.push("MAL " + fmt(m.score));
+  if(!parts.length) return "";
+  return `<p class="meta-line">${parts.join(" · ")}</p>`;
+}
+
+const SERIES_ORDER = ["Fate/Prototype","Fate/Zero","Fate/Stay Night","Unlimited Blade Works","Heaven's Feel","Prisma☆Illya","Карнавальный фантазм","Fate/Extra","Fate/Apocrypha","Fate/Grand Order","Другие миры Fate"];
+const SERIES_COLOR_POOL = ["#8fa4cc","#6fa3e0","#d03a3a","#d9b45b","#c98ae0","#e07a9a","#e0a06f","#6fd8d0","#a3e06f","#d8e06f","#7fbf8e"];
+
+/* ============================================================
+   ПОДКЛЮЧЕНИЕ ОБЩЕЙ БАЗЫ (Firebase Realtime Database)
+   Один раз, 5 минут:
+   1) console.firebase.google.com → «Создать проект» (имя любое,
+      Google Analytics можно выключить)
+   2) Слева: Build → Realtime Database → «Создать базу данных»
+      (регион любой, режим — тестовый)
+   3) Вкладка «Правила» → вставить и опубликовать:
+      { "rules": { ".read": true, ".write": true } }
+   4) Наверху страницы базы скопировать её URL вида
+      https://имя-проекта-default-rtdb.europe-west1.firebasedatabase.app
+      и вставить в кавычки строкой ниже:
+   ============================================================ */
+const DB_URL = "";
+
+const DB_PATH = "/fate-grail.json";
+const LS_KEY = "fate_grail_local_v1";
+
+/* ============================================================
+   Состояние и хранилище
+   ============================================================ */
+let state = null;
+let lastSynced = null; /* JSON-снимок последнего согласованного с хранилищем состояния */
+
+/* ---------- слияние: чтобы Мастера не затирали правки друг друга ---------- */
+function mapBy(arr, key){ const m={}; for(const x of (arr||[])) m[x[key]]=x; return m; }
+
+function mergeStates(remote, local, base){
+  const bT=mapBy(base&&base.titles,"id"), lT=mapBy(local.titles,"id"), rT=mapBy(remote.titles,"id");
+
+  /* повердиктное слияние одного тайтла: берём удалённую версию
+     и накатываем сверху только те вердикты/поля, которые этот
+     клиент реально менял относительно своего последнего снимка */
+  function mergeTitle(r, l, b){
+    const out = JSON.parse(JSON.stringify(r));
+    const bb = b || {};
+    out.ratings = out.ratings||{}; out.reviews = out.reviews||{};
+    const names = new Set([
+      ...Object.keys(l.ratings||{}), ...Object.keys(l.reviews||{}), ...Object.keys(l.media||{}),
+      ...Object.keys(bb.ratings||{}), ...Object.keys(bb.reviews||{}), ...Object.keys(bb.media||{})
+    ]);
+    for(const n of names){
+      const lv = { r:(l.ratings||{})[n], v:(l.reviews||{})[n], m:(l.media||{})[n] };
+      const bv = { r:(bb.ratings||{})[n], v:(bb.reviews||{})[n], m:(bb.media||{})[n] };
+      if(JSON.stringify(lv) !== JSON.stringify(bv)){
+        if(lv.r===undefined) delete out.ratings[n]; else out.ratings[n]=lv.r;
+        if(lv.v===undefined) delete out.reviews[n]; else out.reviews[n]=lv.v;
+        out.media = out.media||{};
+        if(lv.m===undefined) delete out.media[n]; else out.media[n]=lv.m;
+      }
+    }
+    if(JSON.stringify(l.img) !== JSON.stringify(bb.img)) out.img = l.img;
+    for(const f of ["ru","en","q","kind","series","meta","metaLive"]){
+      if(JSON.stringify(l[f]) !== JSON.stringify(bb[f])) out[f] = l[f];
+    }
+    return out;
+  }
+
+  const pick = {};
+  for(const id of new Set([...Object.keys(rT), ...Object.keys(lT), ...Object.keys(bT)])){
+    const l=lT[id], r=rT[id], b=bT[id];
+    if(l && r){ pick[id] = mergeTitle(r, l, b); continue; }
+    const localChanged = JSON.stringify(l) !== JSON.stringify(b);
+    pick[id] = localChanged ? l : r; /* undefined = удалён */
+  }
+  const titles = [];
+  const used = new Set();
+  for(const r of (remote.titles||[])){ if(pick[r.id]){ titles.push(pick[r.id]); used.add(r.id); } }
+  for(const l of (local.titles||[])){ if(pick[l.id] && !used.has(l.id)){ titles.push(pick[l.id]); used.add(l.id); } }
+
+  const bM=mapBy(base&&base.masters,"name"), lM=mapBy(local.masters,"name"), rM=mapBy(remote.masters,"name");
+  const pickM = {};
+  for(const nm of new Set([...Object.keys(rM), ...Object.keys(lM), ...Object.keys(bM)])){
+    const l=lM[nm], r=rM[nm], b=bM[nm];
+    if(l && r){
+      const out = {...r};
+      const bb = b || {};
+      if(l.cls !== bb.cls) out.cls = l.cls;
+      if(l.color !== bb.color) out.color = l.color;
+      pickM[nm] = out;
+      continue;
+    }
+    const localChanged = JSON.stringify(l) !== JSON.stringify(b);
+    pickM[nm] = localChanged ? l : r;
+  }
+  const masters = [];
+  const usedM = new Set();
+  for(const r of (remote.masters||[])){ if(pickM[r.name]){ masters.push(pickM[r.name]); usedM.add(r.name); } }
+  for(const l of (local.masters||[])){ if(pickM[l.name] && !usedM.has(l.name)){ masters.push(pickM[l.name]); usedM.add(l.name); } }
+  if(!masters.length) masters.push(...JSON.parse(JSON.stringify(DEFAULT_MASTERS)));
+
+  return {masters, titles};
+}
+
+async function remoteGet(){
+  const r = await fetch(DB_URL + DB_PATH, {cache:"no-store"});
+  if(!r.ok) throw new Error("http "+r.status);
+  return await r.json(); /* null, если данных ещё нет */
+}
+async function remotePut(payload){
+  const r = await fetch(DB_URL + DB_PATH, {method:"PUT", headers:{"Content-Type":"application/json"}, body: payload});
+  if(!r.ok) throw new Error("http "+r.status);
+}
+function cacheLocal(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){ /* кэш переполнен — не страшно */ }
+}
+
+async function loadState(){
+  /* мгновенная отрисовка из локального кэша устройства */
+  try{
+    const cached = localStorage.getItem(LS_KEY);
+    if(cached) state = JSON.parse(cached);
+  }catch(e){}
+  if(!state || !state.titles || !state.titles.length){
+    state = { masters: JSON.parse(JSON.stringify(DEFAULT_MASTERS)), titles: JSON.parse(JSON.stringify(SEED)) };
+  }
+  if(!state.masters || !state.masters.length) state.masters = JSON.parse(JSON.stringify(DEFAULT_MASTERS));
+
+  if(!DB_URL){
+    document.getElementById("setupNote").classList.add("show");
+    return;
+  }
+  try{
+    const remote = await remoteGet();
+    if(remote && remote.titles && remote.titles.length){
+      state = remote;
+      lastSynced = JSON.stringify(remote);
+      cacheLocal();
+    }else{
+      /* база пуста — заливаем стартовые данные, они станут общими */
+      const payload = JSON.stringify(state);
+      await remotePut(payload);
+      lastSynced = payload;
+    }
+    document.getElementById("banner").classList.remove("show");
+  }catch(e){
+    document.getElementById("banner").classList.add("show");
+  }
+}
+async function saveState(){
+  cacheLocal();
+  if(!DB_URL) return;
+  try{
+    /* прежде чем записать — подтягиваем и вливаем чужие правки,
+       иначе мы бы перезаписали их своей старой копией */
+    if(lastSynced){
+      try{
+        const cur = await remoteGet();
+        if(cur && JSON.stringify(cur) !== lastSynced){
+          state = mergeStates(cur, state, JSON.parse(lastSynced));
+        }
+      }catch(e){ /* базы ещё нет — просто пишем */ }
+    }
+    const payload = JSON.stringify(state);
+    if(payload.length > 8000000) toast("База разрослась — стоит убрать часть картинок");
+    await remotePut(payload);
+    lastSynced = payload;
+    cacheLocal();
+    document.getElementById("banner").classList.remove("show");
+  }catch(e){
+    document.getElementById("banner").classList.add("show");
+  }
+}
+
+/* ---------- прямой эфир: Firebase присылает изменения мгновенно ---------- */
+async function syncFromRemote(){
+  if(!DB_URL) return;
+  /* не дёргаем страницу, пока открыта какая-то форма ввода */
+  if(document.querySelector(".vform.show, .add-form.show, .master-form.show, .backup-panel.show")) return;
+  try{
+    const remote = await remoteGet();
+    if(!remote) return;
+    const remoteStr = JSON.stringify(remote);
+    if(remoteStr === lastSynced) return;
+    state = lastSynced ? mergeStates(remote, state, JSON.parse(lastSynced)) : remote;
+    lastSynced = JSON.stringify(state);
+    cacheLocal();
+    /* если после слияния у нас есть правки, которых нет в базе — дозаписываем */
+    if(lastSynced !== remoteStr){
+      try{ await remotePut(lastSynced); }catch(e){}
+    }
+    render();
+    toast("Грааль обновился — свежие вердикты");
+  }catch(e){ /* сеть недоступна — попробуем в следующий раз */ }
+}
+
+function startLive(){
+  if(!DB_URL) return;
+  if(window.EventSource){
+    try{
+      /* поток событий Firebase: изменения прилетают за доли секунды */
+      const es = new EventSource(DB_URL + DB_PATH);
+      let deb = null;
+      const kick = ()=>{ clearTimeout(deb); deb = setTimeout(syncFromRemote, 350); };
+      es.addEventListener("put", kick);
+      es.addEventListener("patch", kick);
+      /* при обрыве связи браузер переподключится сам */
+    }catch(e){}
+  }
+  /* страховочный опрос + обновление при возвращении на вкладку */
+  setInterval(syncFromRemote, 25000);
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState === "visible") syncFromRemote();
+  });
+}
+
+/* ============================================================
+   Постеры — Jikan API (открытое API MyAnimeList)
+   В предпросмотре Claude внешние запросы могут блокироваться —
+   тогда остаются локальные обложки, а в браузере всё подтянется.
+   ============================================================ */
+function normTitle(s){
+  return String(s).toLowerCase().replace(/[^a-zа-я0-9]+/gi," ").trim();
+}
+async function fetchPoster(t){
+  const url = "https://api.jikan.moe/v4/anime?limit=5&q=" + encodeURIComponent(t.q || t.en || t.ru);
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("http "+r.status);
+  const j = await r.json();
+  const list = (j && j.data) || [];
+  if(!list.length) return null;
+  const want = normTitle(t.q || t.en);
+  let best = list[0];
+  for(const d of list){
+    const names = [d.title, d.title_english, ...(d.title_synonyms||[])].filter(Boolean).map(normTitle);
+    if(names.some(n=>n===want)){ best = d; break; }
+  }
+  const im = best.images && best.images.jpg;
+  const img = im ? (im.large_image_url || im.image_url) : null;
+  const from = best.aired && best.aired.prop && best.aired.prop.from ? best.aired.prop.from.year : null;
+  const to   = best.aired && best.aired.prop && best.aired.prop.to   ? best.aired.prop.to.year   : null;
+  const meta = {
+    year: from ? String(from) + (to && to!==from ? "–"+to : "") : null,
+    studio: (best.studios && best.studios[0] && best.studios[0].name) || null,
+    score: typeof best.score==="number" ? best.score : null,
+    status: best.status==="Currently Airing" ? "онгоинг" : "вышел"
+  };
+  return {img, meta};
+}
+async function ensureImages(){
+  let changed = false;
+  for(const t of state.titles){
+    if(t.img && t.metaLive) continue;
+    try{
+      const r = await fetchPoster(t);
+      if(r){
+        if(r.img && !t.img){
+          t.img = r.img; changed = true;
+          const el = document.querySelector(`.card[data-id="${t.id}"] .poster-slot`);
+          if(el) el.innerHTML = posterHTML(t);
+        }
+        if(r.meta && (r.meta.score || r.meta.studio || r.meta.year)){
+          const base = metaOf(t) || {};
+          t.meta = {...base, ...Object.fromEntries(Object.entries(r.meta).filter(([k,v])=>v!=null))};
+          t.metaLive = true;
+          changed = true;
+        }
+      }
+    }catch(e){ /* среда блокирует сеть — остаются вшитые данные и локальные обложки */ }
+    await new Promise(res=>setTimeout(res, 450)); /* лимит Jikan ~3 запроса/сек */
+  }
+  if(changed){
+    await saveState();
+    render();
+  }
+}
+function seriesColor(series){
+  const list = [...SERIES_ORDER];
+  for(const t of state.titles) if(!list.includes(t.series)) list.push(t.series);
+  const i = list.indexOf(series);
+  return SERIES_COLOR_POOL[(i<0?0:i) % SERIES_COLOR_POOL.length];
+}
+function phInitial(t){
+  const src = (t.en||t.ru).replace(/^fate\W*/i,"").trim();
+  return (src.charAt(0)||"F").toUpperCase();
+}
+function posterHTML(t){
+  const ph = `<div class="poster-ph" style="--acc:${seriesColor(t.series)}">
+      <span class="ph-letter">${esc(phInitial(t))}</span>
+      <span class="ph-kind">${esc(t.kind||"")}</span>
+    </div>`;
+  if(t.img) return `<img class="poster" src="${esc(t.img)}" alt="Постер: ${esc(t.ru)}" loading="lazy"
+    onerror="this.outerHTML=${esc(JSON.stringify(ph))}">`;
+  return ph;
+}
+
+/* ============================================================
+   Хелперы
+   ============================================================ */
+function avgOf(t){
+  const vals = Object.values(t.ratings||{}).filter(v=>typeof v==="number");
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function fmt(n){
+  if(n===null||n===undefined) return "—";
+  return (Math.round(n*100)/100).toString().replace(".",",");
+}
+function scoreColor(v){
+  if(v===null) return "var(--ink-dim)";
+  if(v < 4) return "var(--crimson)";
+  if(v < 7) return "var(--gold)";
+  return "#8fd49a";
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function ringSVG(v){
+  const R=25, C=2*Math.PI*R;
+  const frac = v===null ? 0 : Math.max(0,Math.min(1,v/10));
+  const col = scoreColor(v);
+  return `<svg viewBox="0 0 56 56" aria-hidden="true">
+    <circle cx="28" cy="28" r="${R}" fill="none" stroke="var(--line)" stroke-width="3"/>
+    <circle cx="28" cy="28" r="20" fill="none" stroke="var(--line)" stroke-width=".8" stroke-dasharray="2 4"/>
+    <circle cx="28" cy="28" r="${R}" fill="none" stroke="${col}" stroke-width="3"
+      stroke-dasharray="${(frac*C).toFixed(1)} ${C.toFixed(1)}"
+      stroke-linecap="round" transform="rotate(-90 28 28)"/>
+  </svg>`;
+}
+/* Двухшаговое подтверждение: системный confirm() блокируется
+   в предпросмотре, поэтому первый клик взводит кнопку, второй выполняет */
+function armedClick(btn, armedText, fn){
+  btn.addEventListener("click", async ()=>{
+    if(!btn.dataset.armed){
+      btn.dataset.armed = "1";
+      btn.dataset.orig = btn.textContent;
+      btn.textContent = armedText;
+      btn.classList.add("armed");
+      btn._t = setTimeout(()=>{
+        delete btn.dataset.armed;
+        btn.textContent = btn.dataset.orig;
+        btn.classList.remove("armed");
+      }, 4000);
+      return;
+    }
+    clearTimeout(btn._t);
+    delete btn.dataset.armed;
+    btn.classList.remove("armed");
+    await fn();
+  });
+}
+function allSeries(){
+  const list = [...SERIES_ORDER];
+  for(const t of state.titles) if(!list.includes(t.series)) list.push(t.series);
+  return list;
+}
+
+/* ============================================================
+   Рендер
+   ============================================================ */
+function render(){
+  const row = document.getElementById("mastersRow");
+  row.innerHTML = state.masters.map(m=>
+    `<span class="master-chip"><span class="mc-ico" data-name="${esc(m.name)}" style="color:${m.color}" title="Класс: ${clsName(clsOf(m))} — клик, чтобы сменить">${clsIcon(clsOf(m))}</span>${esc(m.name)}<button class="master-x" data-name="${esc(m.name)}" title="Удалить Мастера (вердикты сохранятся)">×</button></span>`).join("")
+    + `<button class="master-add" id="masterAdd">+ Мастер</button>`;
+  document.getElementById("masterAdd").addEventListener("click", ()=>{
+    document.getElementById("masterForm").classList.toggle("show");
+    document.getElementById("masterName").focus();
+  });
+  row.querySelectorAll(".mc-ico").forEach(ic=>{
+    ic.addEventListener("click", async ()=>{
+      const m = state.masters.find(mm=>mm.name===ic.dataset.name);
+      if(!m) return;
+      const order = CLASSES.map(c=>c[0]);
+      m.cls = order[(order.indexOf(clsOf(m))+1) % order.length];
+      await saveState();
+      render();
+      toast(`${m.name} теперь класса ${clsName(m.cls)}`);
+    });
+  });
+  row.querySelectorAll(".master-x").forEach(x=>{
+    x.addEventListener("click", async ()=>{
+      if(!x.dataset.armed){
+        x.dataset.armed = "1";
+        x.textContent = "удалить?";
+        x.classList.add("armed-x");
+        x._t = setTimeout(()=>{ delete x.dataset.armed; x.textContent="×"; x.classList.remove("armed-x"); }, 4000);
+        return;
+      }
+      clearTimeout(x._t);
+      const name = x.dataset.name;
+      state.masters = state.masters.filter(m=>m.name!==name);
+      await saveState();
+      render();
+      toast(`Мастер ${name} покинул войну — вердикты сохранены`);
+    });
+  });
+
+  const rated = state.titles.filter(t=>avgOf(t)!==null);
+  document.getElementById("statWatched").textContent = rated.length + " / " + state.titles.length;
+  const allAvg = rated.length ? rated.reduce((a,t)=>a+avgOf(t),0)/rated.length : null;
+  document.getElementById("statAvg").textContent = fmt(allAvg);
+  const best = rated.length ? rated.reduce((a,b)=>avgOf(a)>avgOf(b)?a:b) : null;
+  document.getElementById("statBest").textContent = best ? fmt(avgOf(best)) : "—";
+  document.getElementById("statBest").title = best ? best.ru : "";
+
+  /* datalist разделов: только те, где реально есть тайтлы */
+  document.getElementById("seriesList").innerHTML = allSeries()
+    .filter(s => state.titles.some(t => t.series === s))
+    .map(s=>`<option value="${esc(s)}">`).join("");
+
+  const openIds = new Set([...document.querySelectorAll(".card.open")].map(c=>c.dataset.id));
+
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  const chips = [];
+
+  allSeries().forEach((s, si)=>{
+    const titles = state.titles.filter(t=>t.series===s);
+    if(!titles.length) return;
+    const sec = document.createElement("section");
+    sec.className = "series";
+    sec.id = "sec" + si;
+    sec.innerHTML = `<div class="series-head">
+      <span class="s-mark">${seriesMarkSVG(seriesColor(s))}</span>
+      <h2>${esc(s)}</h2><div class="rule"></div><span class="cnt">${titles.length}</span></div>`;
+    titles.forEach((t,i)=> sec.appendChild(card(t, i+1, openIds.has(t.id))));
+    app.appendChild(sec);
+    chips.push(`<button class="qchip" data-target="sec${si}" style="--c:${seriesColor(s)}">${esc(s)}</button>`);
+  });
+
+  document.getElementById("qnavChips").innerHTML = chips.join("");
+}
+
+function card(t, num, open){
+  const el = document.createElement("article");
+  el.className = "card" + (open ? " open" : "");
+  el.dataset.id = t.id;
+  el.dataset.search = (t.ru + " " + t.en + " " + t.series).toLowerCase();
+  const a = avgOf(t);
+
+  const minis = state.masters.map(m=>{
+    const v = t.ratings[m.name];
+    return `<span class="mini" style="color:${v==null?'var(--ink-dim)':m.color}" title="${esc(m.name)}">${v==null?"·":fmt(v)}</span>`;
+  }).join("");
+
+  const known = state.masters.map(m=>m.name);
+  const extra = [...new Set([...Object.keys(t.ratings||{}), ...Object.keys(t.reviews||{})])].filter(n=>!known.includes(n));
+  const people = [
+    ...state.masters.map(m=>({name:m.name, color:m.color, gone:false})),
+    ...extra.map(n=>({name:n, color:"#7c82a0", gone:true}))
+  ];
+  const reviews = people.filter(p =>
+      (t.reviews[p.name]&&t.reviews[p.name].trim()) ||
+      typeof t.ratings[p.name]==="number" ||
+      ((t.media&&t.media[p.name])||[]).length
+    ).map(p=>{
+    const v = t.ratings[p.name];
+    const txt = (t.reviews[p.name]||"").trim();
+    const media = (t.media&&t.media[p.name])||[];
+    const mediaHTML = media.length
+      ? `<div class="review-media">${media.map(u=>`<img src="${u}" alt="Картинка к вердикту" loading="lazy">`).join("")}</div>`
+      : "";
+    return `<div class="review" style="border-color:${p.color}">
+      <div class="review-head">
+        <span class="rv-ico" style="color:${p.color}">${clsIcon(clsOfName(p.name))}</span>
+        <b style="color:${p.color}">${esc(p.name)}</b>
+        ${p.gone?'<span class="gone">выбыл из войны</span>':""}
+        <span class="score" style="color:${scoreColor(v==null?null:v)}">${v==null?"без оценки":fmt(v)+" / 10"}</span>
+      </div>
+      ${txt?`<p>${esc(txt)}</p>`:""}
+      ${mediaHTML}
+    </div>`;
+  }).join("");
+
+  const kindClass = t.kind==="Фильм" ? "kind film" : "kind";
+
+  el.innerHTML = `
+    <button class="card-top" aria-expanded="${open}">
+      <span class="idx">${String(num).padStart(2,"0")}</span>
+      <span class="poster-slot">${posterHTML(t)}</span>
+      <div class="avg">${ringSVG(a)}<b style="color:${scoreColor(a)}" class="${a===null?'nul':''}">${a===null?"?":fmt(a)}</b></div>
+      <div class="card-titles">
+        <h3>${esc(t.ru)}</h3>
+        <div class="sub-line">
+          <span class="${kindClass}">${esc(t.kind||"Сезон")}</span>
+          <p>${esc(t.en)}</p>
+        </div>
+        ${metaLineHTML(t)}
+      </div>
+      <div class="mini-ratings">${minis}</div>
+      <span class="chev">▼</span>
+    </button>
+    <div class="card-body">
+      ${reviews || `<p class="no-reviews">Вердиктов ещё нет — Грааль ждёт.</p>`}
+      <div class="card-actions">
+        <button class="verdict-btn" data-act="form">✒ &nbsp;Оставить / изменить вердикт</button>
+        <button class="btn-ghost" data-act="poster">Свой постер</button>
+        <button class="btn-ghost btn-danger" data-act="delete">Изгнать тайтл</button>
+      </div>
+      <div class="vform">
+        <label>Кто ты, Мастер?</label>
+        <div class="who-row">
+          ${state.masters.map(m=>`<button class="who" data-who="${esc(m.name)}" style="color:${m.color}">${clsIcon(clsOf(m))}<span>${esc(m.name)}</span></button>`).join("")}
+        </div>
+        <label>Оценка</label>
+        <div class="score-row">
+          <div class="score-btns">
+            ${Array.from({length:10},(_,i)=>`<button type="button" class="sbtn" data-v="${i+1}">${i+1}</button>`).join("")}
+          </div>
+          <input type="number" class="score-num" min="0" max="10" step="0.01" value="7" title="Можно вписать точнее — например 9,99 или 0">
+        </div>
+        <label>Отзыв</label>
+        <textarea placeholder="Синема или хуйня? Обоснуй."></textarea>
+        <label style="margin-top:14px">Мемы и скриншоты — до 3 штук</label>
+        <div class="vmedia"></div>
+        <button class="btn-ghost" data-act="meme" type="button">🖼 &nbsp;Прикрепить картинку</button>
+        <div class="vform-actions">
+          <button class="btn-gold" data-act="save">Записать в Грааль</button>
+          <button class="btn-ghost btn-danger" data-act="clear">Стереть мой вердикт</button>
+          <button class="btn-ghost" data-act="cancel">Отмена</button>
+        </div>
+      </div>
+    </div>`;
+
+  el.querySelector(".card-top").addEventListener("click", ()=>{
+    el.classList.toggle("open");
+    el.querySelector(".card-top").setAttribute("aria-expanded", el.classList.contains("open"));
+  });
+
+  const form = el.querySelector(".vform");
+  const num2 = form.querySelector(".score-num");
+  const ta = form.querySelector("textarea");
+  const vmedia = form.querySelector(".vmedia");
+  const sbtns = [...form.querySelectorAll(".sbtn")];
+  let who = null;
+  let pending = [];
+
+  function markScore(v){
+    sbtns.forEach(b=>b.classList.toggle("sel", Number(b.dataset.v)===v));
+  }
+  sbtns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      num2.value = b.dataset.v;
+      markScore(Number(b.dataset.v));
+    });
+  });
+  num2.addEventListener("input", ()=> markScore(parseFloat(num2.value)));
+
+  function renderPending(){
+    vmedia.innerHTML = pending.map((u,i)=>
+      `<span class="vthumb"><img src="${u}" alt=""><button type="button" data-i="${i}" title="Убрать картинку">×</button></span>`).join("");
+    vmedia.querySelectorAll("button").forEach(b=>{
+      b.addEventListener("click", ()=>{ pending.splice(+b.dataset.i, 1); renderPending(); });
+    });
+  }
+
+  el.querySelector("[data-act=form]").addEventListener("click", ()=> form.classList.toggle("show"));
+
+  form.querySelector("[data-act=meme]").addEventListener("click", ()=>{
+    if(!who){ toast("Сначала выбери, кто ты"); return; }
+    if(pending.length >= 3){ toast("Не больше трёх картинок на вердикт"); return; }
+    memeCtx = { pending, renderPending };
+    document.getElementById("memeFile").click();
+  });
+
+  el.querySelector("[data-act=poster]").addEventListener("click", ()=>{
+    posterTarget = t;
+    document.getElementById("posterFile").click();
+  });
+
+  armedClick(el.querySelector("[data-act=delete]"), "Точно изгнать? Жми ещё раз", async ()=>{
+    state.titles = state.titles.filter(x=>x.id!==t.id);
+    await saveState();
+    render();
+    toast(`«${t.ru}» изгнан из Грааля`);
+  });
+
+  form.querySelectorAll(".who").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      form.querySelectorAll(".who").forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+      who = btn.dataset.who;
+      const v = t.ratings[who];
+      if(typeof v==="number") num2.value = v;
+      markScore(typeof v==="number" ? v : null);
+      ta.value = t.reviews[who] || "";
+      pending = [ ...((t.media && t.media[who]) || []) ];
+      renderPending();
+    });
+  });
+
+  form.querySelector("[data-act=save]").addEventListener("click", async ()=>{
+    if(!who){ toast("Сначала выбери, кто ты"); return; }
+    const v = Math.max(0,Math.min(10,parseFloat(num2.value)));
+    if(isNaN(v)){ toast("Оценка должна быть числом 0–10"); return; }
+    t.ratings[who] = v;
+    t.reviews[who] = ta.value.trim();
+    t.media = t.media || {};
+    if(pending.length) t.media[who] = pending;
+    else delete t.media[who];
+    await saveState();
+    render();
+    toast("Вердикт записан в Грааль");
+  });
+  form.querySelector("[data-act=clear]").addEventListener("click", async ()=>{
+    if(!who){ toast("Сначала выбери, кто ты"); return; }
+    delete t.ratings[who];
+    delete t.reviews[who];
+    if(t.media) delete t.media[who];
+    await saveState();
+    render();
+    toast("Вердикт стёрт");
+  });
+  form.querySelector("[data-act=cancel]").addEventListener("click", ()=> form.classList.remove("show"));
+
+  return el;
+}
+
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove("show"), 2200);
+}
+
+/* ---------- навигация: клик = плавная прокрутка, зажал и потянул = листание ленты ---------- */
+(function(){
+  const strip = document.getElementById("qnavChips");
+  let down = false, startX = 0, startScroll = 0, moved = false;
+
+  strip.addEventListener("pointerdown", (e)=>{
+    if(e.pointerType !== "mouse") return; /* на тач-экранах лента и так листается пальцем */
+    down = true; moved = false;
+    startX = e.clientX;
+    startScroll = strip.scrollLeft;
+    strip.classList.add("dragging");
+  });
+  window.addEventListener("pointermove", (e)=>{
+    if(!down) return;
+    const dx = e.clientX - startX;
+    if(Math.abs(dx) > 5) moved = true;
+    strip.scrollLeft = startScroll - dx;
+  });
+  window.addEventListener("pointerup", ()=>{
+    down = false;
+    strip.classList.remove("dragging");
+  });
+
+  strip.addEventListener("click", (e)=>{
+    const chip = e.target.closest(".qchip");
+    if(!chip) return;
+    e.preventDefault();
+    if(moved){ moved = false; return; } /* это было перетаскивание, а не клик */
+    const sec = document.getElementById(chip.dataset.target);
+    if(sec) sec.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+})();
+
+/* ---------- свой постер ---------- */
+let posterTarget = null;
+
+function compressImage(file, maxW, maxH, quality){
+  return new Promise((resolve, reject)=>{
+    const fr = new FileReader();
+    fr.onerror = ()=>reject(new Error("read"));
+    fr.onload = ()=>{
+      const im = new Image();
+      im.onload = ()=>{
+        const k = Math.min(maxW/im.width, maxH/im.height, 1);
+        const w = Math.max(1, Math.round(im.width*k));
+        const h = Math.max(1, Math.round(im.height*k));
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(im, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", quality));
+      };
+      im.onerror = ()=>reject(new Error("decode"));
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+document.getElementById("posterFile").addEventListener("change", async (e)=>{
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  const t = posterTarget;
+  posterTarget = null;
+  if(!f || !t) return;
+  try{
+    t.img = await compressImage(f, 240, 340, 0.82); /* ужимаем, чтобы влезть в хранилище */
+    await saveState();
+    const slot = document.querySelector(`.card[data-id="${t.id}"] .poster-slot`);
+    if(slot) slot.innerHTML = posterHTML(t);
+    toast("Постер установлен для всех");
+  }catch(err){
+    toast("Не удалось прочитать картинку");
+  }
+});
+
+/* ---------- мемы к вердиктам ---------- */
+let memeCtx = null;
+document.getElementById("memeFile").addEventListener("change", async (e)=>{
+  const files = [...(e.target.files||[])];
+  e.target.value = "";
+  const ctx = memeCtx;
+  memeCtx = null;
+  if(!ctx || !files.length) return;
+  for(const f of files){
+    if(ctx.pending.length >= 3){ toast("Не больше трёх картинок на вердикт"); break; }
+    try{
+      ctx.pending.push(await compressImage(f, 640, 640, 0.8));
+    }catch(err){ toast("Не удалось прочитать картинку"); }
+  }
+  ctx.renderPending();
+});
+
+/* лайтбокс: клик по картинке в отзыве — во весь экран, клик — закрыть */
+const lightbox = document.getElementById("lightbox");
+lightbox.addEventListener("click", ()=> lightbox.classList.remove("show"));
+document.addEventListener("click", (e)=>{
+  const img = e.target.closest(".review-media img");
+  if(!img) return;
+  lightbox.querySelector("img").src = img.src;
+  lightbox.classList.add("show");
+});
+
+/* ---------- бэкап и восстановление ---------- */
+document.getElementById("backupToggle").addEventListener("click", ()=>{
+  document.getElementById("backupPanel").classList.toggle("show");
+});
+
+function exportJSON(){
+  return JSON.stringify({app:"fate-grail-tracker", version:3, saved:new Date().toISOString(), state}, null, 1);
+}
+
+document.getElementById("backupDownload").addEventListener("click", ()=>{
+  try{
+    const blob = new Blob([exportJSON()], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "fate-grail-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast("Бэкап скачивается. Если нет — жми «Показать текстом»");
+  }catch(e){
+    document.getElementById("backupText").value = exportJSON();
+    toast("Скачивание заблокировано — скопируй текст ниже");
+  }
+});
+
+document.getElementById("backupShow").addEventListener("click", ()=>{
+  const ta = document.getElementById("backupText");
+  ta.value = exportJSON();
+  ta.focus();
+  ta.select();
+  toast("Выделено — копируй (Ctrl/Cmd+C)");
+});
+
+async function doRestore(text){
+  let parsed;
+  try{ parsed = JSON.parse(text); }
+  catch(e){ toast("Это не похоже на бэкап: не читается JSON"); return; }
+  const st = parsed && parsed.state ? parsed.state : parsed;
+  if(!st || !Array.isArray(st.titles) || !st.titles.length){
+    toast("В бэкапе нет тайтлов — восстановление отменено"); return;
+  }
+  if(!Array.isArray(st.masters) || !st.masters.length) st.masters = JSON.parse(JSON.stringify(DEFAULT_MASTERS));
+  state = st;
+  await saveState();
+  render();
+  toast("Данные восстановлены из бэкапа");
+  ensureImages();
+}
+
+document.getElementById("restoreFileBtn").addEventListener("click", ()=>{
+  document.getElementById("restoreFile").click();
+});
+document.getElementById("restoreFile").addEventListener("change", (e)=>{
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>doRestore(fr.result);
+  fr.onerror = ()=>toast("Не удалось прочитать файл");
+  fr.readAsText(f);
+});
+
+armedClick(document.getElementById("restoreTextBtn"), "Перезапишет всё — жми ещё раз", async ()=>{
+  const txt = document.getElementById("backupText").value.trim();
+  if(!txt){ toast("Сначала вставь текст бэкапа в поле ниже"); return; }
+  await doRestore(txt);
+});
+
+/* ---------- новый Мастер ---------- */
+document.getElementById("masterCancel").addEventListener("click", ()=>{
+  document.getElementById("masterForm").classList.remove("show");
+});
+document.getElementById("masterSave").addEventListener("click", async ()=>{
+  const name = document.getElementById("masterName").value.trim();
+  if(!name){ toast("Мастеру нужно имя"); return; }
+  if(state.masters.some(m=>m.name.toLowerCase()===name.toLowerCase())){ toast("Такой Мастер уже в войне"); return; }
+  const used = new Set(state.masters.map(m=>m.color));
+  const color = COLOR_POOL.find(c=>!used.has(c)) || COLOR_POOL[state.masters.length % COLOR_POOL.length];
+  state.masters.push({name, color});
+  await saveState();
+  document.getElementById("masterName").value = "";
+  document.getElementById("masterForm").classList.remove("show");
+  render();
+  toast(`Мастер ${name} вступил в войну`);
+});
+
+/* ---------- добавление тайтла ---------- */
+document.getElementById("addToggle").addEventListener("click", ()=>{
+  document.getElementById("addForm").classList.toggle("show");
+});
+document.getElementById("addCancel").addEventListener("click", ()=>{
+  document.getElementById("addForm").classList.remove("show");
+});
+document.getElementById("addSave").addEventListener("click", async ()=>{
+  const ru = document.getElementById("addRu").value.trim();
+  const en = document.getElementById("addEn").value.trim();
+  const series = document.getElementById("addSeries").value.trim() || (en || ru);
+  const kind = document.getElementById("addKind").value;
+  if(!ru){ toast("Нужно хотя бы русское название"); return; }
+  state.titles.push(T("t"+Date.now(), series, kind, ru, en||ru, en||ru, {}, {}));
+  await saveState();
+  ["addRu","addEn","addSeries"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("addForm").classList.remove("show");
+  render();
+  toast("Тайтл призван");
+  ensureImages();
+});
+
+/* ---------- старт ---------- */
+(async ()=>{
+  await loadState();
+  render();
+  startLive();
+  ensureImages();
+})();
+</script>
+</body>
+</html>
