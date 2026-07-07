@@ -76,7 +76,6 @@
     padding:5px 14px;border-radius:2px;border:1px solid var(--line);
     background:var(--night-2);
   }
-  .master-chip i{display:inline-block;width:7px;height:7px;margin-right:8px;transform:rotate(45deg);border-radius:1px}
   .mc-ico{
     display:inline-flex;width:15px;height:15px;margin-right:7px;vertical-align:-3px;
     cursor:pointer;transition:filter .15s;
@@ -178,7 +177,6 @@
     font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.05em;
     color:var(--moon);margin-top:3px;
   }
-  .meta-line .ongoing{color:#8fd49a;text-transform:uppercase;letter-spacing:.12em;font-size:9.5px}
   .mini-ratings{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:150px}
   .mini{
     font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
@@ -330,12 +328,6 @@
     margin:0 -20px;padding:10px 20px;
     display:flex;gap:12px;align-items:center;
   }
-  .qnav input[type=search]{
-    flex-shrink:0;width:190px;background:var(--night-2);border:1px solid var(--line);
-    color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;
-    padding:8px 12px;border-radius:2px;
-  }
-  .qnav input[type=search]:focus{outline:2px solid var(--gold);outline-offset:-1px}
   .qnav-chips{
     display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;
     scrollbar-width:none;-ms-overflow-style:none;
@@ -502,10 +494,10 @@
    Данные из HottieAss.xlsx + вся вышедшая франшиза
    ============================================================ */
 const DEFAULT_MASTERS = [
-  {name:"Даниэле", color:"#d9b45b"},
-  {name:"Ксюша",   color:"#e07a9a"},
-  {name:"Рома",    color:"#6fa3e0"},
-  {name:"Паша",    color:"#7fbf8e"}
+  {name:"Даниэле", color:"#d9b45b", order:0},
+  {name:"Ксюша",   color:"#e07a9a", order:1},
+  {name:"Рома",    color:"#6fa3e0", order:2},
+  {name:"Паша",    color:"#7fbf8e", order:3}
 ];
 const COLOR_POOL = ["#d9b45b","#e07a9a","#6fa3e0","#7fbf8e","#c98ae0","#e0a06f","#6fd8d0","#d8e06f","#a3e06f","#e06f6f","#8fa4cc","#e0c46f"];
 
@@ -686,10 +678,6 @@ const SEED = [
   T("fgocamelot2","Fate/Grand Order","Фильм","FGO — Камелот II: Paladin; Agateram","FGO Camelot 2 - Paladin; Agateram","Fate/Grand Order Camelot Paladin Agateram",{},{}),
   T("fgosolomon","Fate/Grand Order","Фильм","FGO — Соломон","Fate/Grand Order: Kani Jikan Shinden Solomon","Fate/Grand Order Solomon",{},{}),
 
-  /* ---------- Другие миры Fate ---------- */
-  T("emiyagohan","Другие миры Fate","ONA","Сегодняшний обед семьи Эмии","Emiya-san Chi no Kyou no Gohan","Emiya-san Chi no Kyou no Gohan",{},{}),
-  T("elmelloi","Другие миры Fate","Сезон","Дело лорда Эль-Меллоя II: Rail Zeppelin","Lord El-Melloi II Sei no Jikenbo","Lord El-Melloi II Sei no Jikenbo Rail Zeppelin Grace Note",{},{}),
-  T("strangefake","Другие миры Fate","Спешлы","Судьба/Странная подделка: Шёпот рассвета","Fate/strange Fake: Whispers of Dawn","Fate/strange Fake Whispers of Dawn",{},{})
 ];
 
 /* ============================================================
@@ -735,9 +723,6 @@ const META = {
   fgocamelot1:   ["2020","Signal.MD",6.9],
   fgocamelot2:   ["2021","Production I.G",7.6],
   fgosolomon:    ["2021","CloverWorks",7.7],
-  emiyagohan:    ["2018","ufotable",7.5],
-  elmelloi:      ["2019","TROYCA",7.4],
-  strangefake:   ["2023","A-1 Pictures",7.9]
 };
 
 /* Справочник по названиям — для тайтлов, добавленных вручную через
@@ -773,7 +758,7 @@ const META_BY_TITLE = {
 function metaOf(t){
   if(t.meta && (t.meta.score || t.meta.studio || t.meta.year)) return t.meta;
   const m = META[t.id] || META_BY_TITLE[normTitle(t.en || t.q || t.ru)];
-  return m ? {year:m[0], studio:m[1], score:m[2], status:"вышел"} : null;
+  return m ? {year:m[0], studio:m[1], score:m[2]} : null;
 }
 function metaLineHTML(t){
   const m = metaOf(t);
@@ -786,7 +771,7 @@ function metaLineHTML(t){
   return `<p class="meta-line">${parts.join(" · ")}</p>`;
 }
 
-const SERIES_ORDER = ["Fate/Prototype","Fate/Zero","Fate/Stay Night","Unlimited Blade Works","Heaven's Feel","Prisma☆Illya","Карнавальный фантазм","Fate/Extra","Fate/Apocrypha","Fate/Grand Order","Другие миры Fate"];
+const SERIES_ORDER = ["Fate/Prototype","Fate/Zero","Fate/Stay Night","Unlimited Blade Works","Heaven's Feel","Prisma☆Illya","Карнавальный фантазм","Fate/Extra","Fate/Apocrypha","Fate/Grand Order"];
 const SERIES_COLOR_POOL = ["#8fa4cc","#6fa3e0","#d03a3a","#d9b45b","#c98ae0","#e07a9a","#e0a06f","#6fd8d0","#a3e06f","#d8e06f","#7fbf8e"];
 
 /* ============================================================
@@ -811,7 +796,6 @@ const LS_KEY = "fate_grail_local_v1";
    Состояние и хранилище
    ============================================================ */
 let state = null;
-let lastSynced = null; /* JSON-снимок последнего согласованного с хранилищем состояния */
 
 /* ---------- слияние: чтобы Мастера не затирали правки друг друга ---------- */
 /* ============================================================
@@ -861,10 +845,10 @@ function verdictToDB(t, who){
 }
 function toDB(st){
   const db = {v2:true, masters:{}, titles:{}, verdicts:{}};
-  for(const m of st.masters){
-    db.masters[m.name] = {name:m.name, color:m.color};
+  st.masters.forEach((m,i)=>{
+    db.masters[m.name] = {name:m.name, color:m.color, order:(typeof m.order==="number" ? m.order : i)};
     if(m.cls) db.masters[m.name].cls = m.cls;
-  }
+  });
   st.titles.forEach((t,i)=>{
     db.titles[t.id] = titleToDB(t, i);
     const names = new Set([...Object.keys(t.ratings||{}), ...Object.keys(t.reviews||{}), ...Object.keys(t.media||{})]);
@@ -876,7 +860,8 @@ function toDB(st){
   return db;
 }
 function fromDB(db){
-  const masters = Object.values(db.masters||{}).filter(Boolean);
+  const masters = Object.values(db.masters||{}).filter(Boolean)
+    .sort((a,b)=>(typeof a.order==="number"?a.order:1e9)-(typeof b.order==="number"?b.order:1e9));
   const titles = Object.values(db.titles||{}).filter(Boolean)
     .sort((a,b)=>(a.order||0)-(b.order||0))
     .map(t=>{
@@ -967,11 +952,27 @@ async function loadState(){
       state = normalizeState(raw);
       await dbRaw("", toDB(state));
     }
+    await healMasterOrder();
     lastSeen = JSON.stringify(state);
     cacheLocal();
     document.getElementById("banner").classList.remove("show");
   }catch(e){
     document.getElementById("banner").classList.add("show");
+  }
+}
+
+/* если Мастера сохранены без порядкового номера (старые данные) —
+   выстраиваем: исходная четвёрка в каноническом порядке, остальные следом,
+   и один раз дописываем номера в базу */
+async function healMasterOrder(){
+  if(!state.masters.some(m=>typeof m.order!=="number")) return;
+  const canon = {"Даниэле":0,"Ксюша":1,"Рома":2,"Паша":3};
+  const known = state.masters.filter(m=>canon[m.name]!==undefined).sort((a,b)=>canon[a.name]-canon[b.name]);
+  const rest  = state.masters.filter(m=>canon[m.name]===undefined);
+  state.masters = [...known, ...rest];
+  state.masters.forEach((m,i)=>m.order=i);
+  for(const m of state.masters){
+    await dbSend("masters/"+encSeg(m.name), {order:m.order}, true);
   }
 }
 
@@ -1045,8 +1046,7 @@ async function fetchPoster(t){
   const meta = {
     year: from ? String(from) + (to && to!==from ? "–"+to : "") : null,
     studio: (best.studios && best.studios[0] && best.studios[0].name) || null,
-    score: typeof best.score==="number" ? best.score : null,
-    status: best.status==="Currently Airing" ? "онгоинг" : "вышел"
+    score: typeof best.score==="number" ? best.score : null
   };
   return {img, meta};
 }
@@ -1184,7 +1184,7 @@ function render(){
       if(!m) return;
       const order = CLASSES.map(c=>c[0]);
       m.cls = order[(order.indexOf(clsOf(m))+1) % order.length];
-      await dbSend("masters/"+encSeg(m.name), {name:m.name, color:m.color, cls:m.cls});
+      await dbSend("masters/"+encSeg(m.name), {cls:m.cls}, true);
       render();
       toast(`${m.name} теперь класса ${clsName(m.cls)}`);
     });
@@ -1249,7 +1249,6 @@ function card(t, num, open){
   const el = document.createElement("article");
   el.className = "card" + (open ? " open" : "");
   el.dataset.id = t.id;
-  el.dataset.search = (t.ru + " " + t.en + " " + t.series).toLowerCase();
   const a = avgOf(t);
 
   const minis = state.masters.map(m=>{
@@ -1625,8 +1624,9 @@ document.getElementById("masterSave").addEventListener("click", async ()=>{
   if(state.masters.some(m=>m.name.toLowerCase()===name.toLowerCase())){ toast("Такой Мастер уже в войне"); return; }
   const used = new Set(state.masters.map(m=>m.color));
   const color = COLOR_POOL.find(c=>!used.has(c)) || COLOR_POOL[state.masters.length % COLOR_POOL.length];
-  state.masters.push({name, color});
-  await dbSend("masters/"+encSeg(name), {name, color});
+  const order = 1 + Math.max(-1, ...state.masters.map(m=>typeof m.order==="number"?m.order:-1));
+  state.masters.push({name, color, order});
+  await dbSend("masters/"+encSeg(name), {name, color, order});
   document.getElementById("masterName").value = "";
   document.getElementById("masterForm").classList.remove("show");
   render();
