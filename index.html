@@ -802,7 +802,7 @@ const SERIES_COLOR_POOL = ["#8fa4cc","#6fa3e0","#d03a3a","#d9b45b","#c98ae0","#e
       https://имя-проекта-default-rtdb.europe-west1.firebasedatabase.app
       и вставить в кавычки строкой ниже:
    ============================================================ */
-const DB_URL = "https://fate-base-friends-default-rtdb.europe-west1.firebasedatabase.app";
+const DB_URL = "";
 
 const DB_PATH = "/fate-grail.json";
 const LS_KEY = "fate_grail_local_v1";
@@ -814,78 +814,20 @@ let state = null;
 let lastSynced = null; /* JSON-снимок последнего согласованного с хранилищем состояния */
 
 /* ---------- слияние: чтобы Мастера не затирали правки друг друга ---------- */
-function mapBy(arr, key){ const m={}; for(const x of (arr||[])) m[x[key]]=x; return m; }
+/* ============================================================
+   ХРАНЕНИЕ БЕЗ КОНФЛИКТОВ
+   Каждый вердикт, тайтл и Мастер живут в СВОЕЙ ячейке базы.
+   Одновременные действия разных людей пишутся по разным адресам
+   и физически не могут перезаписать друг друга.
 
-function mergeStates(remote, local, base){
-  const bT=mapBy(base&&base.titles,"id"), lT=mapBy(local.titles,"id"), rT=mapBy(remote.titles,"id");
-
-  /* повердиктное слияние одного тайтла: берём удалённую версию
-     и накатываем сверху только те вердикты/поля, которые этот
-     клиент реально менял относительно своего последнего снимка */
-  function mergeTitle(r, l, b){
-    const out = JSON.parse(JSON.stringify(r));
-    const bb = b || {};
-    out.ratings = out.ratings||{}; out.reviews = out.reviews||{};
-    const names = new Set([
-      ...Object.keys(l.ratings||{}), ...Object.keys(l.reviews||{}), ...Object.keys(l.media||{}),
-      ...Object.keys(bb.ratings||{}), ...Object.keys(bb.reviews||{}), ...Object.keys(bb.media||{})
-    ]);
-    for(const n of names){
-      const lv = { r:(l.ratings||{})[n], v:(l.reviews||{})[n], m:(l.media||{})[n] };
-      const bv = { r:(bb.ratings||{})[n], v:(bb.reviews||{})[n], m:(bb.media||{})[n] };
-      if(JSON.stringify(lv) !== JSON.stringify(bv)){
-        if(lv.r===undefined) delete out.ratings[n]; else out.ratings[n]=lv.r;
-        if(lv.v===undefined) delete out.reviews[n]; else out.reviews[n]=lv.v;
-        out.media = out.media||{};
-        if(lv.m===undefined) delete out.media[n]; else out.media[n]=lv.m;
-      }
-    }
-    if(JSON.stringify(l.img) !== JSON.stringify(bb.img)) out.img = l.img;
-    for(const f of ["ru","en","q","kind","series","meta","metaLive"]){
-      if(JSON.stringify(l[f]) !== JSON.stringify(bb[f])) out[f] = l[f];
-    }
-    return out;
-  }
-
-  const pick = {};
-  for(const id of new Set([...Object.keys(rT), ...Object.keys(lT), ...Object.keys(bT)])){
-    const l=lT[id], r=rT[id], b=bT[id];
-    if(l && r){ pick[id] = mergeTitle(r, l, b); continue; }
-    const localChanged = JSON.stringify(l) !== JSON.stringify(b);
-    pick[id] = localChanged ? l : r; /* undefined = удалён */
-  }
-  const titles = [];
-  const used = new Set();
-  for(const r of (remote.titles||[])){ if(pick[r.id]){ titles.push(pick[r.id]); used.add(r.id); } }
-  for(const l of (local.titles||[])){ if(pick[l.id] && !used.has(l.id)){ titles.push(pick[l.id]); used.add(l.id); } }
-
-  const bM=mapBy(base&&base.masters,"name"), lM=mapBy(local.masters,"name"), rM=mapBy(remote.masters,"name");
-  const pickM = {};
-  for(const nm of new Set([...Object.keys(rM), ...Object.keys(lM), ...Object.keys(bM)])){
-    const l=lM[nm], r=rM[nm], b=bM[nm];
-    if(l && r){
-      const out = {...r};
-      const bb = b || {};
-      if(l.cls !== bb.cls) out.cls = l.cls;
-      if(l.color !== bb.color) out.color = l.color;
-      pickM[nm] = out;
-      continue;
-    }
-    const localChanged = JSON.stringify(l) !== JSON.stringify(b);
-    pickM[nm] = localChanged ? l : r;
-  }
-  const masters = [];
-  const usedM = new Set();
-  for(const r of (remote.masters||[])){ if(pickM[r.name]){ masters.push(pickM[r.name]); usedM.add(r.name); } }
-  for(const l of (local.masters||[])){ if(pickM[l.name] && !usedM.has(l.name)){ masters.push(pickM[l.name]); usedM.add(l.name); } }
-  if(!masters.length) masters.push(...JSON.parse(JSON.stringify(DEFAULT_MASTERS)));
-
-  return {masters, titles};
-}
+   Схема базы:
+   /fate-grail/masters/{имя}            — Мастер (цвет, класс)
+   /fate-grail/titles/{id}              — тайтл (названия, постер, мета, порядок)
+   /fate-grail/verdicts/{id}/{имя}      — вердикт: {r: оценка, v: текст, m: картинки}
+   ============================================================ */
 
 /* Firebase выбрасывает пустые объекты и может превращать массивы
-   в объекты с числовыми ключами — приводим данные в порядок
-   после каждого чтения */
+   в объекты с числовыми ключами — приводим данные в порядок */
 function normalizeState(st){
   if(!st) return st;
   if(st.titles && !Array.isArray(st.titles)) st.titles = Object.values(st.titles);
@@ -899,15 +841,101 @@ function normalizeState(st){
   return st;
 }
 
-async function remoteGet(){
-  const r = await fetch(DB_URL + DB_PATH, {cache:"no-store"});
-  if(!r.ok) throw new Error("http "+r.status);
-  return normalizeState(await r.json()); /* null, если данных ещё нет */
+/* приложение ⇄ база */
+function titleToDB(t, i){
+  const o = {id:t.id, series:t.series, kind:t.kind||"Сезон", ru:t.ru, en:t.en, q:t.q||t.en,
+             order:(i!==undefined ? i : (t.order||0))};
+  if(t.img) o.img = t.img;
+  if(t.meta) o.meta = t.meta;
+  if(t.metaLive) o.metaLive = true;
+  return o;
 }
-async function remotePut(payload){
-  const r = await fetch(DB_URL + DB_PATH, {method:"PUT", headers:{"Content-Type":"application/json"}, body: payload});
+function verdictToDB(t, who){
+  const val = {ts: Date.now()};
+  if(typeof (t.ratings||{})[who] === "number") val.r = t.ratings[who];
+  const tx = ((t.reviews||{})[who]||"").trim();
+  if(tx) val.v = tx;
+  const mm = (t.media||{})[who];
+  if(mm && mm.length) val.m = mm;
+  return (val.r!==undefined || val.v || val.m) ? val : null;
+}
+function toDB(st){
+  const db = {v2:true, masters:{}, titles:{}, verdicts:{}};
+  for(const m of st.masters){
+    db.masters[m.name] = {name:m.name, color:m.color};
+    if(m.cls) db.masters[m.name].cls = m.cls;
+  }
+  st.titles.forEach((t,i)=>{
+    db.titles[t.id] = titleToDB(t, i);
+    const names = new Set([...Object.keys(t.ratings||{}), ...Object.keys(t.reviews||{}), ...Object.keys(t.media||{})]);
+    for(const n of names){
+      const val = verdictToDB(t, n);
+      if(val){ db.verdicts[t.id] = db.verdicts[t.id]||{}; db.verdicts[t.id][n] = val; }
+    }
+  });
+  return db;
+}
+function fromDB(db){
+  const masters = Object.values(db.masters||{}).filter(Boolean);
+  const titles = Object.values(db.titles||{}).filter(Boolean)
+    .sort((a,b)=>(a.order||0)-(b.order||0))
+    .map(t=>{
+      const vd = (db.verdicts||{})[t.id] || {};
+      const ratings={}, reviews={}, media={};
+      for(const n in vd){
+        const v = vd[n]||{};
+        if(typeof v.r === "number") ratings[n]=v.r;
+        if(v.v) reviews[n]=v.v;
+        if(v.m) media[n] = Array.isArray(v.m) ? v.m : Object.values(v.m);
+      }
+      return {...t, ratings, reviews, media};
+    });
+  return {masters: masters.length ? masters : JSON.parse(JSON.stringify(DEFAULT_MASTERS)), titles};
+}
+
+/* точечные запросы к базе */
+async function dbRaw(path, value, patch){
+  const url = DB_URL + "/fate-grail" + (path ? "/"+path : "") + ".json";
+  const opts = value===null
+    ? {method:"DELETE"}
+    : {method: patch ? "PATCH" : "PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(value)};
+  const r = await fetch(url, opts);
   if(!r.ok) throw new Error("http "+r.status);
 }
+let writesPending = 0;
+const pendingQueue = [];
+async function dbSend(path, value, patch){
+  cacheLocal();
+  if(!DB_URL) return;
+  writesPending++;
+  try{
+    await dbRaw(path, value, patch);
+    lastSeen = JSON.stringify(state);
+    document.getElementById("banner").classList.remove("show");
+  }catch(e){
+    /* нет сети — запоминаем и дошлём, когда связь вернётся */
+    pendingQueue.push({path, value, patch});
+    document.getElementById("banner").classList.add("show");
+  }finally{
+    writesPending--;
+  }
+}
+async function flushQueue(){
+  while(pendingQueue.length){
+    const w = pendingQueue[0];
+    try{ await dbRaw(w.path, w.value, w.patch); pendingQueue.shift(); }
+    catch(e){ return; }
+  }
+  document.getElementById("banner").classList.remove("show");
+}
+function encSeg(s){ return encodeURIComponent(String(s)); }
+
+async function rootGet(){
+  const r = await fetch(DB_URL + "/fate-grail.json", {cache:"no-store"});
+  if(!r.ok) throw new Error("http "+r.status);
+  return await r.json();
+}
+
 function cacheLocal(){
   try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){ /* кэш переполнен — не страшно */ }
 }
@@ -928,40 +956,18 @@ async function loadState(){
     return;
   }
   try{
-    const remote = await remoteGet();
-    if(remote && remote.titles && remote.titles.length){
-      state = remote;
-      lastSynced = JSON.stringify(remote);
-      cacheLocal();
+    const raw = await rootGet();
+    if(!raw){
+      /* база пуста — заливаем стартовые данные */
+      await dbRaw("", toDB(state));
+    }else if(raw.v2){
+      state = fromDB(raw);
     }else{
-      /* база пуста — заливаем стартовые данные, они станут общими */
-      const payload = JSON.stringify(state);
-      await remotePut(payload);
-      lastSynced = payload;
+      /* данные старого формата — один раз переводим в новый */
+      state = normalizeState(raw);
+      await dbRaw("", toDB(state));
     }
-    document.getElementById("banner").classList.remove("show");
-  }catch(e){
-    document.getElementById("banner").classList.add("show");
-  }
-}
-async function saveState(){
-  cacheLocal();
-  if(!DB_URL) return;
-  try{
-    /* прежде чем записать — подтягиваем и вливаем чужие правки,
-       иначе мы бы перезаписали их своей старой копией */
-    if(lastSynced){
-      try{
-        const cur = await remoteGet();
-        if(cur && JSON.stringify(cur) !== lastSynced){
-          state = mergeStates(cur, state, JSON.parse(lastSynced));
-        }
-      }catch(e){ /* базы ещё нет — просто пишем */ }
-    }
-    const payload = JSON.stringify(state);
-    if(payload.length > 8000000) toast("База разрослась — стоит убрать часть картинок");
-    await remotePut(payload);
-    lastSynced = payload;
+    lastSeen = JSON.stringify(state);
     cacheLocal();
     document.getElementById("banner").classList.remove("show");
   }catch(e){
@@ -969,23 +975,23 @@ async function saveState(){
   }
 }
 
-/* ---------- прямой эфир: Firebase присылает изменения мгновенно ---------- */
+/* ---------- прямой эфир ---------- */
+let lastSeen = null;
 async function syncFromRemote(){
   if(!DB_URL) return;
+  await flushQueue();
+  if(writesPending > 0 || pendingQueue.length) return;
   /* не дёргаем страницу, пока открыта какая-то форма ввода */
   if(document.querySelector(".vform.show, .add-form.show, .master-form.show, .backup-panel.show")) return;
   try{
-    const remote = await remoteGet();
-    if(!remote) return;
-    const remoteStr = JSON.stringify(remote);
-    if(remoteStr === lastSynced) return;
-    state = lastSynced ? mergeStates(remote, state, JSON.parse(lastSynced)) : remote;
-    lastSynced = JSON.stringify(state);
+    const raw = await rootGet();
+    if(!raw || !raw.v2) return;
+    const fresh = fromDB(raw);
+    const s = JSON.stringify(fresh);
+    if(s === lastSeen) return;
+    state = fresh;
+    lastSeen = s;
     cacheLocal();
-    /* если после слияния у нас есть правки, которых нет в базе — дозаписываем */
-    if(lastSynced !== remoteStr){
-      try{ await remotePut(lastSynced); }catch(e){}
-    }
     render();
     toast("Грааль обновился — свежие вердикты");
   }catch(e){ /* сеть недоступна — попробуем в следующий раз */ }
@@ -996,7 +1002,7 @@ function startLive(){
   if(window.EventSource){
     try{
       /* поток событий Firebase: изменения прилетают за доли секунды */
-      const es = new EventSource(DB_URL + DB_PATH);
+      const es = new EventSource(DB_URL + "/fate-grail.json");
       let deb = null;
       const kick = ()=>{ clearTimeout(deb); deb = setTimeout(syncFromRemote, 350); };
       es.addEventListener("put", kick);
@@ -1067,7 +1073,15 @@ async function ensureImages(){
     await new Promise(res=>setTimeout(res, 450)); /* лимит Jikan ~3 запроса/сек */
   }
   if(changed){
-    await saveState();
+    for(const t of state.titles){
+      if(t.img || t.metaLive){
+        const patch = {};
+        if(t.img) patch.img = t.img;
+        if(t.meta) patch.meta = t.meta;
+        if(t.metaLive) patch.metaLive = true;
+        await dbSend("titles/"+encSeg(t.id), patch, true);
+      }
+    }
     render();
   }
 }
@@ -1170,7 +1184,7 @@ function render(){
       if(!m) return;
       const order = CLASSES.map(c=>c[0]);
       m.cls = order[(order.indexOf(clsOf(m))+1) % order.length];
-      await saveState();
+      await dbSend("masters/"+encSeg(m.name), {name:m.name, color:m.color, cls:m.cls});
       render();
       toast(`${m.name} теперь класса ${clsName(m.cls)}`);
     });
@@ -1187,7 +1201,7 @@ function render(){
       clearTimeout(x._t);
       const name = x.dataset.name;
       state.masters = state.masters.filter(m=>m.name!==name);
-      await saveState();
+      await dbSend("masters/"+encSeg(name), null); /* вердикты остаются в своих ячейках */
       render();
       toast(`Мастер ${name} покинул войну — вердикты сохранены`);
     });
@@ -1370,7 +1384,8 @@ function card(t, num, open){
 
   armedClick(el.querySelector("[data-act=delete]"), "Точно изгнать? Жми ещё раз", async ()=>{
     state.titles = state.titles.filter(x=>x.id!==t.id);
-    await saveState();
+    await dbSend("titles/"+encSeg(t.id), null);
+    await dbSend("verdicts/"+encSeg(t.id), null);
     render();
     toast(`«${t.ru}» изгнан из Грааля`);
   });
@@ -1398,7 +1413,7 @@ function card(t, num, open){
     t.media = t.media || {};
     if(pending.length) t.media[who] = pending;
     else delete t.media[who];
-    await saveState();
+    await dbSend("verdicts/"+encSeg(t.id)+"/"+encSeg(who), verdictToDB(t, who));
     render();
     toast("Вердикт записан в Грааль");
   });
@@ -1407,7 +1422,7 @@ function card(t, num, open){
     delete t.ratings[who];
     delete t.reviews[who];
     if(t.media) delete t.media[who];
-    await saveState();
+    await dbSend("verdicts/"+encSeg(t.id)+"/"+encSeg(who), null);
     render();
     toast("Вердикт стёрт");
   });
@@ -1490,7 +1505,7 @@ document.getElementById("posterFile").addEventListener("change", async (e)=>{
   if(!f || !t) return;
   try{
     t.img = await compressImage(f, 240, 340, 0.82); /* ужимаем, чтобы влезть в хранилище */
-    await saveState();
+    await dbSend("titles/"+encSeg(t.id), {img: t.img}, true);
     const slot = document.querySelector(`.card[data-id="${t.id}"] .poster-slot`);
     if(slot) slot.innerHTML = posterHTML(t);
     toast("Постер установлен для всех");
@@ -1570,7 +1585,11 @@ async function doRestore(text){
   }
   if(!Array.isArray(st.masters) || !st.masters.length) st.masters = JSON.parse(JSON.stringify(DEFAULT_MASTERS));
   state = st;
-  await saveState();
+  cacheLocal();
+  if(DB_URL){
+    try{ await dbRaw("", toDB(state)); lastSeen = JSON.stringify(state); }
+    catch(e){ document.getElementById("banner").classList.add("show"); }
+  }
   render();
   toast("Данные восстановлены из бэкапа");
   ensureImages();
@@ -1607,7 +1626,7 @@ document.getElementById("masterSave").addEventListener("click", async ()=>{
   const used = new Set(state.masters.map(m=>m.color));
   const color = COLOR_POOL.find(c=>!used.has(c)) || COLOR_POOL[state.masters.length % COLOR_POOL.length];
   state.masters.push({name, color});
-  await saveState();
+  await dbSend("masters/"+encSeg(name), {name, color});
   document.getElementById("masterName").value = "";
   document.getElementById("masterForm").classList.remove("show");
   render();
@@ -1627,8 +1646,10 @@ document.getElementById("addSave").addEventListener("click", async ()=>{
   const series = document.getElementById("addSeries").value.trim() || (en || ru);
   const kind = document.getElementById("addKind").value;
   if(!ru){ toast("Нужно хотя бы русское название"); return; }
-  state.titles.push(T("t"+Date.now(), series, kind, ru, en||ru, en||ru, {}, {}));
-  await saveState();
+  const nt = T("t"+Date.now(), series, kind, ru, en||ru, en||ru, {}, {});
+  nt.order = 1 + Math.max(0, ...state.titles.map(x=>x.order||0));
+  state.titles.push(nt);
+  await dbSend("titles/"+encSeg(nt.id), titleToDB(nt));
   ["addRu","addEn","addSeries"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("addForm").classList.remove("show");
   render();
